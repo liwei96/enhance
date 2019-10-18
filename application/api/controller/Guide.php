@@ -50,7 +50,7 @@ class Guide extends Controller
         $data=$request->param()['value'];
         $bid=$request->param()['bid'];
         $l=Building::where('id',$bid)->column('building_name')[0];
-        $id=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$l)->find();
+        $id=Db::connect('db_config1')->table('tpshop.tpshop_goods')->where('building_name','eq',$l)->find();
         $id=$id['id'];
         $list=$request->param()['value'];
         $list['bid']=$id;
@@ -58,8 +58,8 @@ class Guide extends Controller
         $list['gid']=$ma;
         $list['create_time']=time();
         $list['update_time']=time();
-        Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_text')->insert($list);
-        Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_text')->insert($list);
+        Db::connect('db_config1')->table('tpshop.tpshop_text')->insert($list);
+        Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
         $data['bid']=$bid;
         $data['gid']=$ma;
         $data['s_id']=session('user.id');
@@ -129,8 +129,8 @@ class Guide extends Controller
         GuideModel::update($data,['id'=>$id]);
         $gid=$data['gid'];
 
-        Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
-        Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
+        Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods.tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
+        Db::connect(config(''))->table('tpshop_goods.tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
         $res=['code'=>200];
         return json($res);
     }

@@ -24,7 +24,7 @@ class Role extends Controller
         return json($res);
     }
 
-    public function list(){
+    public function listSelect(){
         $data=RoleModel::field("id,name")->select();
         return json(['code'=>200,'data'=>$data]);
     }

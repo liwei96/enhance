@@ -18,35 +18,34 @@ use app\api\model\Gen;
 class User extends Controller
 {
     /**
-     * 客户信息首页查询
-     * @return \think\response\Json
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * 显示资源列表
+     *
+     * @return \think\Response
      */
     public function index()
     {
-        $n = input('param.n',10);
-        $y = input('param.y',1);
-        $from = ($y-1)*$n ;
+     
+        $t=request()->param();
+        $n=$t['n'];
+        $y=$t['y'];
+        $y=$y-1;
         $userid = session('user.id');
-
         if(session('user.super')==1){
-            $data=UserModel::where(" s_id!=0 and status !=0"  )->limit($from,$n)->order('id','desc')->select();
+            $data=UserModel::where(" s_id!=0 and status !=0"  )->limit($n*$y,$n)->order('id','desc')->select();
             $num=UserModel::where(" s_id!=0 and status !=0"  )->count();
         }else if(session('user.guide')!=1){
             $ids=Staff::where('pid',$userid)->select();
             $ids=$this->gets($ids);
             $ids[]=session('user.id');
-            $data=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->limit($from,$n)->order('id','desc')->select();
-            $num=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->count();
+            $data=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->limit($y*$n,$n)->order('id','desc')->select();
+            $num=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->count('id');
         }else{
-            $data=UserModel::where("s_id= $userid  and  status !=0 ")->order('id','desc')->limit($from,$n)->select();
+            $data=UserModel::where("s_id= $userid  and  status !=0 ")->order('id','desc')->limit($n*$y,$n)->select();
             $num=UserModel::where(" s_id= $userid  and  status !=0 ")->count();
         }
         foreach($data as $v){
             if(Building::where('id',$v['project'])->column('building_name')){
-                $v['project']=Building::where('id',$v['project'])->value('building_name');
+                $v['project']=Building::where('id',$v['project'])->column('building_name')[0];
             }else{
                 $v['project']='未定义';
             }

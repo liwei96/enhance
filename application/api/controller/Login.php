@@ -92,13 +92,12 @@ class Login extends Controller
         if($re){
             $re['ids']=Role::where('id',$re['job'])->value('ids');
 
-            
             session('user',$re);
 
-            // if(!in_array($phone,config('app.white_list_phone'))){
-            //     cache($phone,null);//验证码建议长期有效
-            // }
-            cache($re['name'],$num,3600);
+            if(!in_array($phone,config('app.white_list_phone'))){
+                cache($phone,null);//验证码建议长期有效
+            }
+            cache($re['name'],$num,14400);
             return json(['code'=>200,'num'=>$num,'re'=>$re]);
         }else{
             return json(['code'=>300]);
@@ -133,7 +132,7 @@ class Login extends Controller
 
         if($result){
 
-            if(in_array($phone,['18868181816'])){//白名单手机号
+            if(in_array($phone,config('app.white_list_phone'))){//白名单手机号
                 Cache::set($phone,$code);//建议长期有效
             }else{
                 Cache::set($phone,$code,300);//建议长期有效
@@ -152,50 +151,7 @@ class Login extends Controller
             return json($res);
         }
     }
-    /**
-     * 显示指定的资源
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function read($id)
-    {
-        //
-    }
 
-    /**
-     * 显示编辑资源表单页.
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * 保存更新的资源
-     *
-     * @param  \think\Request  $request
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * 删除指定资源
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function delete($id)
-    {
-        //
-    }
 
     public function logout(){
         Session::start();

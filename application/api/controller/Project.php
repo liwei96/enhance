@@ -429,13 +429,13 @@ class Project extends Controller
         $b['preferential']=$data['preferential'];
         $b['traffic']=$data['traffic'];
         $b['introduce']=$data['introduce'];
-        $b['humianji']=$data['taomian'];
-        $b['danjia']=$data['danjia'];
+        $b['humianji']= isset($data['taomian'])? $data['taomian']:'';
+        $b['danjia']= isset($data['danjia'])? $data['danjia']:'';
         $b['shoulou']=$data['shoulou'];
         $b['jiaotime']=$data['jiaotime'];
         $b['channian']=$data['channian'];
-        $b['yushou']=$data['yushou'];
-        $b['keys']=$data['keys'];
+        $b['yushou']= isset($data['yushou'])? $data['yushou']:'';
+        $b['keys']= isset($data['keys'])? $data['keys']:'';
         $b['zong']=$data['zong'];
         $b['zongjia']=$zong;
         $b['building_tese']=$te;
@@ -443,15 +443,15 @@ class Project extends Controller
         $b['building_ditie']=$di;
         $b['kaitime']=$data['o_kaitime'];
         $b['n_time']=$data['nadi_time'];
-        $b['transfer']=$data['transfer'];
-        $b['tdeng']=$data['project_extend_dengji'];
+        $b['transfer']= isset($data['transfer'])? $data['transfer']:'';
+        $b['tdeng']= isset($data['project_extend_dengji'])? $data['project_extend_dengji']:'';
         $fenji=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_tell')->where('name','eq',$data['building_name'])->find();
         if(!$fenji){
-            Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_tell')->insert(['transfer'=>$data['transfer'],'name'=>$data['building_name']]);
+            Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_tell')->insert(['transfer'=> isset($data['transfer'])?$data['transfer']:'' ,'name'=>$data['building_name']]);
         }
         $ll=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->insert($b);
         unset($b['tdeng']);
-        $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_goods')->insert($b);
+        $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->insert($b);
         $re = Building::create($data);
         if (!$re) {
             $res = ['code' => 301, 'msg' => '新增失败'];
@@ -736,12 +736,12 @@ class Project extends Controller
         $di=implode(',',$di);
         $hu=[];
         foreach($data['building_huxing'] as $v){
-            $hu[]=Huxing::where('id',$v)->column('huxing')[0];
+            $hu[]= (Huxing::where('id',$v)->value('huxing')??'');
         }
         $hu=implode(',',$hu);
         $te=[];
         foreach($data['building_tese'] as $v){
-            $te[]=Tese::where('id',$v)->column('tese')[0];
+            $te[]= (Tese::where('id',$v)->value('tese')??'');
         }
         $te=implode(',',$te);
         $zong=$data['zongjia'][0];
@@ -760,7 +760,7 @@ class Project extends Controller
         $data['building_people']=session('user.id');
         $b=[];
         $gid=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$data['building_name'])->find();
-        $yid=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$data['building_name'])->find();
+        $yid=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$data['building_name'])->find();
         $gid=$gid['id'];
         $yid=$yid['id'];
         $b['building_name']=$data['building_name'];
@@ -788,18 +788,18 @@ class Project extends Controller
         $b['rongji']=$data['rongji'];
         $b['jianji']=$data['jianji'];
         $b['hushu']=$data['hushu'];
-        $b['preferential']=$data['preferential'];
-        $b['traffic']=$data['traffic'];
+        $b['preferential']=isset($data['preferential'])?$data['preferential']:'';
+        $b['traffic']=  $data['traffic'];
         $b['introduce']=$data['introduce'];
-        $b['humianji']=$data['taomian'];
+        $b['humianji']= isset($data['taomian'])? $data['taomian']:'';
         if(array_key_exists('danjia',$data)){
             $b['danjia']=$data['danjia'];
         }
         $b['shoulou']=$data['shoulou'];
         $b['jiaotime']=$data['jiaotime'];
         $b['channian']=$data['channian'];
-        $b['yushou']=$data['yushou'];
-        $b['keys']=$data['keys'];
+        $b['yushou']= isset($data['yushou'])? $data['yushou']:'';
+        $b['keys']= isset( $data['keys'])? $data['keys']:'';
         $b['zong']=$data['zong'];
         $b['zongjia']=$zong;
         $b['building_tese']=$te;
@@ -807,12 +807,12 @@ class Project extends Controller
         $b['building_ditie']=$di;
         $b['kaitime']=$data['o_kaitime'];
         $b['n_time']=$data['nadi_time'];
-        $b['transfer']=$data['transfer'];
-        $b['tdeng']=$data['project_extend_dengji'];
-        $fenji=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_tell')->where('name','eq',$data['building_name'])->update(['transfer'=>$data['transfer']]);
+        $b['transfer']= isset($data['transfer'])? $data['transfer']:'';
+        $b['tdeng']=isset($data['project_extend_dengji'])? $data['project_extend_dengji']:'';
+        $fenji=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_tell')->where('name','eq',$data['building_name'])->update(['transfer'=> isset($data['transfer'])?$data['transfer']:'']);
         $ll=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$gid)->update($b);
         unset($b['tdeng']);
-        $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$yid)->update($b);
+        $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$yid)->update($b);
         $re = Building::update($data, ['id' => $id]);
         if (!$re) {
             $res = ['code' => 301, 'msg' => '更新失败'];
@@ -940,7 +940,7 @@ class Project extends Controller
         $data['id']=$id;
         $b=[];
         $gid=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$data['building_name'])->find();
-        $yid=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$data['building_name'])->find();
+        $yid=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$data['building_name'])->find();
         $gid=$gid['id'];
         $yid=$yid['id'];
         $b['building_name']=$data['building_name'];
@@ -967,13 +967,13 @@ class Project extends Controller
         $b['preferential']=$data['preferential'];
         $b['traffic']=$data['traffic'];
         $b['introduce']=$data['introduce'];
-        $b['humianji']=$data['taomian'];
-        $b['danjia']=$data['danjia'];
+        $b['humianji']=isset($data['taomian'])? $data['taomian']:'';
+        $b['danjia']= isset($data['danjia'])? $data['danjia']:"";
         $b['shoulou']=$data['shoulou'];
         $b['jiaotime']=$data['jiaotime'];
         $b['channian']=$data['channian'];
-        $b['yushou']=$data['yushou'];
-        $b['keys']=$data['keys'];
+        $b['yushou']=isset($data['yushou'])? $data['yushou']:'';
+        $b['keys']= isset($data['keys'])? $data['keys']:'';
         $b['zong']=$data['zong'];
         $b['zongjia']=$zong;
         $b['building_tese']=$te;
@@ -981,11 +981,11 @@ class Project extends Controller
         $b['building_ditie']=$di;
         $b['kaitime']=$data['o_kaitime'];
         $b['n_time']=$data['nadi_time'];
-        $b['transfer']=$data['transfer'];
-        $b['tdeng']=$data['project_extend_dengji'];
+        $b['transfer']= isset($data['transfer'])? $data['transfer']:'';
+        $b['tdeng']= isset($data['project_extend_dengji'])?$data['project_extend_dengji']:'';
         $ll=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$gid)->update($b);
         unset($b['tdeng']);
-        $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@127.0.0.1:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$yid)->update($b);
+        $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$yid)->update($b);
         $re = Building::update($data);
         if (!$re) {
             $res = ['code' => 301, 'msg' => '更新失败'];

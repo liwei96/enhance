@@ -23,7 +23,7 @@ class Weichat extends Controller
      */
     public function validate_words(){
         try{
-
+            $fuck = file_get_contents('./static/keyWords.txt');
             $content = input('param.content');//wangxu
             $secret = strtolower(input('param.secret',''));//d72f4974c08005991390f0fd78e8f064
             $salt = config('param.md5_salt','hzyhwl');
@@ -31,7 +31,6 @@ class Weichat extends Controller
             if(md5($salt.$content)!=$secret){
                 throw new \Exception('加密串校验失败');
             }
-            $fuck = file_get_contents('./static/keyWords.txt');
             $keyWord = FilterWord::strPosFuck($content,$fuck);
             if($keyWord){
                 throw new \Exception("输入内容含有敏感词汇({$keyWord}),请重新编辑");

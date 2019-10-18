@@ -253,6 +253,25 @@ class Dai extends Controller
                 $where[]=['port','eq',$tiao['port']];
             }
         }
+        if (array_key_exists('biao',$tiao)) {
+            if($tiao['biao']){
+                if($tiao['biao']=='新客' || $tiao['biao']=='老客'){
+                    $where[]=['dai','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='一客多看'){
+                    $where[]=['label','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='复看'){
+                    $where[]=['fu','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='成交'){
+                    $where[]=['re','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='A'){
+                    $where[]=['grade','like','%'.$tiao['biao'].'%'];
+                }
+            }
+        }
         $data=User::where($where)->limit($n*$y,$n)->select();
         $total=User::where($where)->count('id');
         foreach($data as $v){
