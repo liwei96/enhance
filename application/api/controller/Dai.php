@@ -615,6 +615,28 @@ class Dai extends Controller
                 $where[]=['s_id','in',$ids];
             }
         }
+        if (array_key_exists('biao',$tiao)) {
+            if($tiao['biao']){
+                $where1=[];
+                if($tiao['biao']=='新客' || $tiao['biao']=='老客'){
+                    $where1[]=['dai','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='一客多看'){
+                    $where1[]=['label','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='复看'){
+                    $where1[]=['fu','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='成交'){
+                    $where1[]=['re','like','%'.$tiao['biao'].'%'];
+                }
+                if($tiao['biao']=='A'){
+                    $where1[]=['grade','like','%'.$tiao['biao'].'%'];
+                }
+                $ids=user::where($where1)->column('id');
+                $where[]=['u_id','in',$ids];
+            }
+        }
         if (array_key_exists('area',$tiao)) {
             if($tiao['area']){
                 $ids=Staff::where('area','eq',$tiao['area'])->column('id');
