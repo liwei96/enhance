@@ -68,7 +68,7 @@ class check
             Log::create($ll);
             if($data['num']==Cache::get($data['name'])){
                 if(Session::get('user')){
-                    Cache::set($data['name'],$data['num'],1800);
+                    Cache::set($data['name'],$data['num'],3600);
                     if($this->checkauth()){
                         return $next($request);
                     }else{

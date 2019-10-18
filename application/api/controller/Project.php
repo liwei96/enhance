@@ -548,6 +548,11 @@ class Project extends Controller
                 $where[] = ['building_huxing', 'in', $ss['huxing']];
             }
         }
+        if (array_key_exists('waixiao',$ss)) {
+            if($ss['waixiao']){
+                $where[] = ['waixiao', 'eq', $ss['waixiao']];
+            }
+        }
         $data = Building::where($where)->limit($y*$n,$n)->select();
         foreach ($data as $v) {
             $n = Area::where('id', $v['cate_id'])->column('pid');
