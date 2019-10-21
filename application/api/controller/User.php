@@ -103,9 +103,12 @@ class User extends Controller
             if(!empty($source)){
                 $where = $where." and eu.port = '$source' ";
             }
+            //时间区间选择
             $time = isset($arr_param['time'])?$arr_param['time']:'';
+            
+            
             if(!empty($time)){
-                $where = $where." and BETWEEN '".$time[0]."' AND '".$time[1]."' ";
+                $where = $where." and time BETWEEN '".$time[0]."' AND '".$time[1]."' ";
             }
             //客户姓名
             $custom_name = isset($arr_param['name'])?$arr_param['name']:'';
