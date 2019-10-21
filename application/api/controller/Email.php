@@ -21,12 +21,7 @@ class Email
             $name = input('param.name');
             $title = input('param.title');
             $content = input('param.content');
-            $salt = config('app.md5_salt');
-            $key = strtolower( input('param.key'));
-
-            if(config('app.local') !== true && strtolower( md5($email.$salt)) != strtolower($key)){
-                throw new \Exception('验签失败');
-            }
+           
             $res = EmailSend::getInstance()->send($email,$name,$title,$content);
             if(!empty($res)){
                 throw new \Exception($res);

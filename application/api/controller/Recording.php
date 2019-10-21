@@ -24,11 +24,11 @@ class Recording extends Controller
     public function index()
     {
         //
-        $ids = Record::column('project');
-        $ids = array_unique($ids);
-        $data = Building::where('id','in',$ids)->select();
+        $ids=Record::column('project');
+        $ids=array_unique($ids);
+        $data=Building::where('id','in',$ids)->select();
         foreach($data as $v){
-            $v['total'] = Record::where('project','eq',$v['id'])->count('id');
+            $v['total']=Record::where('project','eq',$v['id'])->count('id');
         }
         $res=[
             'code'=>200,

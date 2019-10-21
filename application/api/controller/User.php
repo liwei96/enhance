@@ -18,17 +18,6 @@ use app\api\model\Gen;
 class User extends Controller
 {
     /**
-<<<<<<< .mine
-     * 显示资源列表
-     *
-     * @return \think\Response
-||||||| .r37
-     * 客户信息首页查询
-     * @return \think\response\Json
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-=======
      * 排序搜索
      * @return \think\response\Json
      */
@@ -149,7 +138,7 @@ class User extends Controller
             }
 
             $sql_search = " SELECT eu.id,eu.name,eu.project,eu.s_id,eu.sid,eu.create_time,
- eu.port,eu.grade,eu.dai,eu.label,eu.time
+ eu.port,eu.grade,eu.dai,eu.label,eu.time,eu.fu,eu.re
  FROM erp.erp_user eu $left_join_add $where order by $order_field $order_type limit $from,$limit ";
 
             $results = Db::query($sql_search);
@@ -185,7 +174,9 @@ class User extends Controller
                     'dai'=>$item['dai']??'',//带看标签
                     'label'=>$item['label']??'',
                     'id'=>$item['id'],
-                    'time'=>$time
+                    'time'=>$time,
+                    're'=>$item['re'],
+                    'fu'=>$item['fu']
                 ];
             }
 
@@ -211,32 +202,30 @@ class User extends Controller
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
->>>>>>> .r43
      */
     public function index()
     {
-     
-        $t=request()->param();
-        $n=$t['n'];
-        $y=$t['y'];
-        $y=$y-1;
+        $n = input('param.n',10);
+        $y = input('param.y',1);
+        $from = ($y-1)*$n ;
         $userid = session('user.id');
+
         if(session('user.super')==1){
-            $data=UserModel::where(" s_id!=0 and status !=0"  )->limit($n*$y,$n)->order('id','desc')->select();
+            $data=UserModel::where(" s_id!=0 and status !=0"  )->limit($from,$n)->order('id','desc')->select();
             $num=UserModel::where(" s_id!=0 and status !=0"  )->count();
         }else if(session('user.guide')!=1){
             $ids=Staff::where('pid',$userid)->select();
             $ids=$this->gets($ids);
             $ids[]=session('user.id');
-            $data=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->limit($y*$n,$n)->order('id','desc')->select();
-            $num=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->count('id');
+            $data=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->limit($from,$n)->order('id','desc')->select();
+            $num=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->count();
         }else{
-            $data=UserModel::where("s_id= $userid  and  status !=0 ")->order('id','desc')->limit($n*$y,$n)->select();
+            $data=UserModel::where("s_id= $userid  and  status !=0 ")->order('id','desc')->limit($from,$n)->select();
             $num=UserModel::where(" s_id= $userid  and  status !=0 ")->count();
         }
         foreach($data as $v){
             if(Building::where('id',$v['project'])->column('building_name')){
-                $v['project']=Building::where('id',$v['project'])->column('building_name')[0];
+                $v['project']=Building::where('id',$v['project'])->value('building_name');
             }else{
                 $v['project']='未定义';
             }

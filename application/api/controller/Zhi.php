@@ -146,13 +146,15 @@ class Zhi extends Controller
     public function save_comment(){
         try{
             $content = input('param.content');
-
+	    if(!$content){
+		return json(['code'=>500,'message'=>'内容不能为空']);
+	    }
             $fuck = file_get_contents('./static/keyWords.txt');
             $keyWord = \FilterWord::strPosFuck($content,$fuck);
             if($keyWord){
                 throw new \Exception("输入内容含有敏感词汇({$keyWord}),请重新编辑");
             }
-
+	    
             $id = input('param.id',0);
 
             $userId = session('user')['id'];
@@ -244,23 +246,9 @@ order by create_time DESC";
 
     // 负责人
     public function fuze(){
-        try{
-            $bid=request()->param('bid');
-            $id=request()->param('id');
-            //没有的话新增
-
-            $guid = new Guide;
-
-            $result =  Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
-
-
-            if(!$result){
-                throw new \Exception('添加失败');
-            }
-            return json(['code'=>200]);
-        }catch (\Exception $e){
-            return json(['code'=>500,'message'=>$e->getMessage()]);
-        }
-
+        $bid=request()->param('bid');
+        $id=request()->param('id');
+        Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
+        return json(['code'=>200]);
     }
 }
