@@ -244,9 +244,23 @@ order by create_time DESC";
 
     // 负责人
     public function fuze(){
-        $bid=request()->param('bid');
-        $id=request()->param('id');
-        Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
-        return json(['code'=>200]);
+        try{
+            $bid=request()->param('bid');
+            $id=request()->param('id');
+            //没有的话新增
+
+            $guid = new Guide;
+
+            $result =  Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
+
+
+            if(!$result){
+                throw new \Exception('添加失败');
+            }
+            return json(['code'=>200]);
+        }catch (\Exception $e){
+            return json(['code'=>500,'message'=>$e->getMessage()]);
+        }
+
     }
 }

@@ -15,8 +15,6 @@ if(!function_exists('encrypt_password')){
         $salt='dasadjfh9u8jdfakf';
         return md5(md5($pwd).$salt);
     }
-
-
 }
 /**
  * 是否是微信浏览器

@@ -18,225 +18,35 @@ use app\api\model\Gen;
 class User extends Controller
 {
     /**
-<<<<<<< .mine
-     * 显示资源列表
-     *
-     * @return \think\Response
-||||||| .r37
      * 客户信息首页查询
      * @return \think\response\Json
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
-=======
-     * 排序搜索
-     * @return \think\response\Json
-     */
-    public function sou(){
-        $page = input('param.y',1);//第几页
-        $limit = input('param.n',10);//每页
-        $from = ($page-1)*$limit;
-        $order_field = input('param.order_field','id');
-        $order_type = input('param.order_type','desc');
-
-        if($order_field == 'id' or $order_field == 'time'){
-            $order_field = "eu.".$order_field;
-        }
-        try{
-
-            $userid = session('user.id');
-            $super = session('user.super');
-            $guid =  session('user.guid');;
-            $type = input('param.type');//公客/私客
-            $arr_param = input('param.value');//请求参数
-            $where = ' where eu.status !=0 ';
-            if($type == '公客'){
-                $where = $where.' and eu.s_id =0 ';// s_id 委托人ID
-            }else{
-                if($super == 1){
-                    $where = $where.' and s_id !=0 ';
-                }else if($guid !=1){//职位等级
-                    $subordinates = Staff::findSubordinates($userid);//下属
-                    if(!empty($subordinates) && count($subordinates)>0){
-                        $where = $where." and eu.s_id in(".implode(',',$subordinates).") ";
-                    }else{
-                        $where = $where." and eu.s_id in(-1) ";//防御意外，if后必有else
-                    }
-                }else{
-                    $where = $where." and eu.s_id ={$userid} ";//自己
-                }
-            }
-
-            //楼盘名称
-            if(isset($arr_param['building_name'])&&!empty($arr_param['building_name'])){
-                $building_name = trim($arr_param['building_name']);
-                $where = $where." and eu.project in(SELECT id FROM erp.erp_building where building_name like '%{$building_name}%') ";
-            }
-            //手机号
-            if(isset($arr_param['tel'])&&!empty($arr_param['tel'])){
-                $select_mobile =  $arr_param['tel'];
-                $where = $where." and eu.tel like '%$select_mobile%' ";
-            }
-            //区
-            if(isset($arr_param['region'])&&!empty($arr_param['region'])){
-                $distinct = $arr_param['region'];
-                $where = $where." and eu.region = $distinct ";
-            }
-            $isDelegatorCondition = $type == '公客'?'sid':'s_id';//公客没有委托人
-            //城市
-            $shop_city = isset($arr_param['city'])?$arr_param['city']:'' ;
-            $shop_distinct = isset($arr_param['area'])?$arr_param['area']:'';
-            $group = isset($arr_param['department'])?$arr_param['department']:'';
-            $staff = isset($arr_param['id'])?$arr_param['id']:'';
-            if(!empty($shop_city)&&empty($shop_distinct)&&empty($group)&&empty($staff)){
-                $where = $where." and eu.$isDelegatorCondition in(SELECT id FROM erp.erp_staff where city = $shop_city ) ";
-            }
-
-            //区
-            if(!empty($shop_distinct)&&empty($group)&&empty($staff)){
-                $where = $where." and eu.$isDelegatorCondition in (SELECT id FROM erp.erp_staff where area = $shop_distinct) ";
-            }
-            //门店/分组
-            if(!empty($group)&&empty($staff)){
-                $where = $where." and eu.$isDelegatorCondition in (SELECT id FROM erp.erp_staff where department = $group ) ";
-            }
-            //具体员工
-            if(!empty($staff)){
-                $where = $where." and eu.$isDelegatorCondition = $staff  ";
-            }
-            //等级
-            $grade = isset($arr_param['grade'])?$arr_param['grade']:'';
-            if(!empty($grade)){
-                $where = $where." and eu.grade = '$grade' ";
-            }
-            //进客来源
-            $source = isset($arr_param['port'])?$arr_param['port']:'';
-            if(!empty($source)){
-                $where = $where." and eu.port = '$source' ";
-            }
-            $time = isset($arr_param['time'])?$arr_param['time']:'';
-            if(!empty($time)){
-                $where = $where." and BETWEEN '".$time[0]."' AND '".$time[1]."' ";
-            }
-            //客户姓名
-            $custom_name = isset($arr_param['name'])?$arr_param['name']:'';
-            if(!empty($custom_name)){
-                $where = $where." and eu.name like '%$custom_name%' ";
-            }
-
-            //总数量
-            $sql_toal = " SELECT count(*) as total FROM erp.erp_user eu $where ";
-            $total = Db::query($sql_toal) ;
-
-            if(!empty($total)){
-                $total = $total[0]['total'];
-            }else{
-                $total = 0;
-            }
-            //按跟单排序的话注入sql
-            if($order_field == 'zjtime'){
-                $left_join_add = " left join (SELECT max(create_time)as follow_time,u_id 
-                FROM  erp.erp_gen where u_id>0 GROUP BY u_id) ge on ge.u_id=eu.id ";
-                $order_field = '  ge.follow_time ';
-            }else{
-                $left_join_add = '';
-                if(empty($order_field)){
-                    $order_field = 'eu.id';
-                }
-                if(empty($order_type)){
-                    $order_type = 'desc';
-                }
-            }
-
-            $sql_search = " SELECT eu.id,eu.name,eu.project,eu.s_id,eu.sid,eu.create_time,
- eu.port,eu.grade,eu.dai,eu.label,eu.time
- FROM erp.erp_user eu $left_join_add $where order by $order_field $order_type limit $from,$limit ";
-
-            $results = Db::query($sql_search);
-            $dataAll = [];
-            foreach ($results as $item){
-                //项目名称
-                $building_name = Building::where('id',$item['project'])->value('building_name','未定义');
-                $delegator = Staff::where('id',$item['s_id'])->value('name','');//委托人
-                $register = Staff::where('id',$item['sid'])->value('name','');//登记人
-                $allter_time = Gen::where('u_id',$item['id'])->order('create_time','desc')->value('t_time','');//提醒时间
-                $follow_time =  Gen::where('u_id',$item['id'])->order('create_time','desc')->value('create_time','');//跟进时间
-
-                //今天的话要标红
-                if(!empty($follow_time)){
-                    $follow_time = date('Y-m-d H:i',$follow_time);
-                }else{
-                    $follow_time = '';
-                }
-
-                $time = empty($item['time'])?'': date('Y-m-d',strtotime($item['time']));
-                $dataAll[]=[
-                    'isnow'=>date('Y-m-d')==date('Y-m-d',strtotime($follow_time))?1:0,
-                    'peo'=>$item['s_id']==0? '公客':'私客',
-                    'name'=>$item['name']??'',
-                    'project'=>$building_name,//进客项目
-                    'port'=>$item['port']??'',//进客来源
-                    's_id'=>$delegator,
-                    'sid'=>$register,
-                    't_time'=>empty( $allter_time)?'':date('Y-m-d',$allter_time),
-                    'g_time'=>$follow_time,
-                    'grade'=>$item['grade']??'',//客户等级
-                    't_time'=> empty($item['create_time'])?'': date('Y-m-d H:i',($item['create_time'])),//登记时间
-                    'dai'=>$item['dai']??'',//带看标签
-                    'label'=>$item['label']??'',
-                    'id'=>$item['id'],
-                    'time'=>$time
-                ];
-            }
-
-            $res=[
-                'code'=>200,
-                'data'=>$dataAll,
-                'total'=>$total
-            ];
-
-        }catch (\Exception $e){
-            $res=[
-                'code'=>500,
-                'data'=>[],
-                'total'=>0,
-                'message'=>$e->getMessage()
-            ];
-        }
-        return json($res);
-    }
-    /**
-     * 客户信息首页查询
-     * @return \think\response\Json
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
->>>>>>> .r43
      */
     public function index()
     {
-     
-        $t=request()->param();
-        $n=$t['n'];
-        $y=$t['y'];
-        $y=$y-1;
+        $n = input('param.n',10);
+        $y = input('param.y',1);
+        $from = ($y-1)*$n ;
         $userid = session('user.id');
+
         if(session('user.super')==1){
-            $data=UserModel::where(" s_id!=0 and status !=0"  )->limit($n*$y,$n)->order('id','desc')->select();
+            $data=UserModel::where(" s_id!=0 and status !=0"  )->limit($from,$n)->order('id','desc')->select();
             $num=UserModel::where(" s_id!=0 and status !=0"  )->count();
         }else if(session('user.guide')!=1){
             $ids=Staff::where('pid',$userid)->select();
             $ids=$this->gets($ids);
             $ids[]=session('user.id');
-            $data=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->limit($y*$n,$n)->order('id','desc')->select();
-            $num=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->count('id');
+            $data=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->limit($from,$n)->order('id','desc')->select();
+            $num=UserModel::where(" s_id in(".implode(',',$ids)." ) and  status !=0 ")->count();
         }else{
-            $data=UserModel::where("s_id= $userid  and  status !=0 ")->order('id','desc')->limit($n*$y,$n)->select();
+            $data=UserModel::where("s_id= $userid  and  status !=0 ")->order('id','desc')->limit($from,$n)->select();
             $num=UserModel::where(" s_id= $userid  and  status !=0 ")->count();
         }
         foreach($data as $v){
             if(Building::where('id',$v['project'])->column('building_name')){
-                $v['project']=Building::where('id',$v['project'])->column('building_name')[0];
+                $v['project']=Building::where('id',$v['project'])->value('building_name');
             }else{
                 $v['project']='未定义';
             }
@@ -533,7 +343,7 @@ class User extends Controller
         return json($res);
     }
 
-    public function sou1(){
+    public function sou(){
         try{
             $type = input('param.type');
             $tiao = input('param.value');
@@ -551,7 +361,6 @@ class User extends Controller
                 }else if(session('user.guide')!=1){
                     $ids=Staff::where('pid',session('user.id'))->select();
                     $ids=$this->gets($ids);
-
                     $ids[]=session('user.id');
                     $where[]=['s_id','in',$ids];
                 }else{
@@ -695,7 +504,6 @@ class User extends Controller
         $y=$t['y'];
         $y=$y-1;
         $where=[];
-        $where[]=['status','eq',1];
         if($type =='公客'){
             $where[]=['s_id','eq',0];
         }else{
@@ -961,14 +769,11 @@ class User extends Controller
         ];
         return json($res);
     }
-
     /**
      * 显示编辑资源表单页.
-     * @param $id
-     * @return \think\response\Json
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     *
+     * @param  int  $id
+     * @return \think\Response
      */
     public function edit($id)
     {
@@ -1041,6 +846,7 @@ class User extends Controller
 
     /**
      * 删除指定资源
+     *
      * @param  int  $id
      * @return \think\Response
      */
@@ -1049,8 +855,6 @@ class User extends Controller
         Db::execute(" UPDATE erp.erp_user set `status` =0 where id= ? ",[$id]);
         return json(['code'=>200]);
     }
-
-
     // 客户量
     public function tong(){
         if(session('user.super')!=1){

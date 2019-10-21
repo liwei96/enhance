@@ -20,7 +20,8 @@
         "topthink/framework": "5.1.*",
         "phpoffice/phpexcel": "^1.8",
         "phpoffice/phpspreadsheet": "^1.7",
-        "topthink/think-image": "^1.0"
+        "topthink/think-image": "^1.0",
+        "phpmailer/phpmailer": "^6.1"
     },
     "autoload": {
         "psr-4": {

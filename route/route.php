@@ -11,58 +11,10 @@
 
 use think\facade\Route;
 
-Route::get('think', function () {
-    return 'hello,ThinkPHP5!';
-});
-Route::group('weichat',[
-    '/validate_words'=>'api/weichat/validate_words'
-]);
-Route::get('/api/demo/redis','api/demo/redis');
-Route::rule('/','index/index');
-Route::rule('api/test/index','api/test/index');
-Route::rule('export','export/index');
-//Route::rule('sdf','export/create');
-Route::get('hello/:name', 'index/hello');
 Route::rule('/test','home/index/buy');
 Route::rule('/pro/create','api/project/create');
-Route::group('login',[
-    'getcode'=>'api/login/getcode',
-    'login'=>'api/login/login',
-    'logout'=>'api/login/logout'
-]);
-Route::group('pro',[
-    'create'=>'api/project/create',
-    'update'=>'api/project/update',
-    'delete'=>'api/project/delete',
-    'index'=>'api/project/index',
-    'getarea'=>'api/project/getSubCate', 
-    'hetong'=>'api/project/upload_hetong',
-    'save'=>'api/project/save',
-    'saveimgs'=>'api/project/saveimgs',
-    'edit'=>'api/project/edit',
-    'delpics'=>'api/project/delpics',
-    'updatetext'=>'api/project/updatetext',
-    'tui'=>'api/project/tui',
-    'test'=>'api/project/test',
-    'img'=>'api/project/img',
-    'getareas'=>'api/project/getareas',
-    'ones'=>'api/project/ones',
-    'tuitong'=>'api/project/tuitong',
-    'xiatong'=>'api/project/xiatong',
-    'list'=>'api/project/list',
-    'sou'=>'api/project/sou',
-    'tsou'=>'api/project/tsou',
-    'dlist'=>'api/project/dlist',
-    'clist'=>'api/project/clist',
-    'tuisou'=>'api/project/tuisou',
-    'tong'=>'api/project/tong',
-    'xiatong'=>'api/project/xiatong',
-    'tuitong'=>'api/project/tuitong',
-    'shen'=>'api/project/shen',
-    'updatex'=>'api/project/updatex',
-    'isdeng'=>'api/project/isdeng',
-    'editpic'=>'api/project/editpic'
-])->middleware('check');
+
+
 Route::group('tuan',[
     'index'=>'api/tuan/edit',
     'save'=>'api/tuan/update',
@@ -92,56 +44,9 @@ Route::group('guide',[
     'delete'=>'api/guide/delete',
     'tong'=>'api/guide/tong'
 ])->middleware('check');
-Route::group('role',[
-    'index'=>'api/role/index',
-    'save'=>'api/role/save',
-    'edit'=>'api/role/edit',
-    'update'=>'api/role/update',
-    'delete'=>'api/role/delete',
-    'fen'=>'api/role/fen',
-    'list'=>'api/role/list'
-])->middleware('check');
-Route::group('api',[
-    'user/recover'=>'api/user/recover',
-]);
-Route::group('user',[
-    'index'=>'api/user/index',
-    'save'=>'api/user/save',
-    'edit'=>'api/user/edit',
-    'update'=>'api/user/update',
-    'delete'=>'api/user/delete',
-    'tong'=>'api/user/tong',
-    'lists'=>'api/user/lists',
-    'area'=>'api/user/area',
-    'sou'=>'api/user/sou',
-    'like'=>'api/user/like',
-    'type'=>'api/user/type',
-    'zsave'=>'api/user/zsave',
-    'qedit'=>'api/user/qedit',
-    'qsave'=>'api/user/qsave',
-    'qupdate'=>'api/user/qupdate',
-    'qdelete'=>'api/user/qdelete',
-    'hsave'=>'api/user/hsave',
-    'hedit'=>'api/user/hedit', 
-    'hupdate'=>'api/user/hupdate',
-    'hdelete'=>'api/user/hdelete',
-    'hindex'=>'api/user/hindex',
-    'qindex'=>'api/user/qindex',
-    'xiang'=>'api/user/xiang',
-    'bing'=>'api/user/bing',
-    'changes'=>'api/user/changes',
-    'changeg'=>'api/user/changeg',
-    'change'=>'api/user/change',
-    'get'=>'api/user/get',
-    'changed'=>'api/user/changed',
-    'g'=>'api/user/g',
-    'sous'=>'api/user/sous',
-    'lsou'=>'api/user/lsou',
-    'gsou'=>'api/user/gsou',
-    'tonglist'=>'api/user/tonglist',
 
-	'dengfen'=>'api/user/dengfen',
-])->middleware('check');
+
+
 
 Route::group('dai',[
     'index'=>'api/dai/index',
@@ -250,6 +155,4 @@ Route::group('qu',[
     'two'=>'api/qu/two',
     'peo'=>'api/qu/peo'
 ])->middleware('check');
-return [ 
 
-];

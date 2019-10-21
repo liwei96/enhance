@@ -9,29 +9,33 @@ use app\api\model\Log;
 class check
 {
     function checkauth(){
-        $role_id=session('user.job');
-        if(1==$role_id){
-            return true;
-        }
-        $controller=request()->controller();
-        $action=request()->action();
-        if($controller=='index' && $action=='index'){
-            return true;
-        }
-        $role=session('user');
-        $role_auth_ids=$role['ids'];
-        $auth=Auth::where([
-            ['auth_c','eq',$controller],
-            ['auth_a','eq',$action]
-        ])->find();
-        if(!$auth){
-            return true;
-        }
-        $auth_id=$auth['id'];
-        if(!in_array($auth_id,explode(',',$role_auth_ids))){
+        try{
+            $role_id=session('user.job');
+            if(1==$role_id){
+                return true;
+            }
+            $controller=request()->controller();
+            $action=request()->action();
+            if($controller=='index' && $action=='index'){
+                return true;
+            }
+            $role=session('user');
+            $role_auth_ids=$role['ids'];
+            $auth=Auth::where([
+                ['auth_c','eq',$controller],
+                ['auth_a','eq',$action]
+            ])->find();
+            if(!$auth){
+                return true;
+            }
+            $auth_id=$auth['id'];
+            if(!in_array($auth_id,explode(',',$role_auth_ids))){
+                return false;
+            }else{
+                return true;
+            }
+        }catch (\Exception $e){
             return false;
-        }else{
-            return true;
         }
     }
     public function ip() {
@@ -51,20 +55,19 @@ class check
 
     public function handle($request, \Closure $next)
     {
-        //本地不验证 只针对部分接口
-//        $local = config('app.local');
-//        if($local){
-//            return $next($request);
-//        }
+
+        if(config('app.local')==true){
+            return $next($request);
+        }
 
         try{
             $data=$request->param();
             $ll=[];
             $ll['name']=$data['name'];
             $ll['ip']=$this->ip();
-            $ll['controller']=request()->controller();
-            $ll['action']=request()->action();
-            $ll['nei']=memory_get_peak_usage()/1024/1024;
+            $ll['controller'] = request()->controller();
+            $ll['action'] = request()->action();
+            $ll['nei']= memory_get_peak_usage()/1024/1024;
             Log::create($ll);
             if($data['num']==Cache::get($data['name'])){
                 if(Session::get('user')){
