@@ -1,6 +1,7 @@
 <?php
 
 namespace app\http\middleware;
+use app\api\model\Staff;
 use think\facade\Session;
 use think\facade\Cache;
 use app\api\model\Auth;
@@ -56,9 +57,11 @@ class check
     public function handle($request, \Closure $next)
     {
 
-        if(config('app.local')==true){
-            return $next($request);
-        }
+        // if(config('app.local')==true){
+        //     return $next($request);
+        // }else{
+        //     return json(['code'=>300,'msg'=>'不知道什么东西过期了']);
+        // }
 
         try{
             $data=$request->param();
@@ -68,15 +71,24 @@ class check
             $ll['controller'] = request()->controller();
             $ll['action'] = request()->action();
             $ll['nei']= memory_get_peak_usage()/1024/1024;
-            Log::create($ll);
+
+
             if($data['num']==Cache::get($data['name'])){
-                if(Session::get('user')){
+                if(Session::has('user')){
                     Cache::set($data['name'],$data['num'],3600);
                     if($this->checkauth()){
+                        $param = input('param.');
+                        $ll['param']= json_encode($param,JSON_UNESCAPED_UNICODE);
+                        $ll['userid'] = session('user.id');
+                        Log::create($ll);
+
+                        // cache($data['name'],$data['num'],3600);
                         return $next($request);
                     }else{
                         return json(['code'=>'403','msg'=>'没有权限']);
                     }
+                }else{
+                    return json(['code'=>'300','msg'=>'失去登录状态']);
                 }
             }else{
                 return json(['code'=>402,'msg'=>'登录超时，请重新登录']);

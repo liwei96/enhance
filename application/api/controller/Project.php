@@ -1149,41 +1149,52 @@ class Project extends Controller
 
     public function img()
     {
-        $data = request()->param()['data'];
-        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        $str = "";
-        for ($i = 0; $i < 8; $i++) {
-            $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
-        }
-        $lujing = './uploads/' . date('Ymd');
-        if (!is_dir($lujing)) {
-            mkdir(iconv("UTF-8", "GBK", $lujing), 0777, true);
-        }
-        $type = explode(',', $data)[0];
-        $type = explode(';', $type)[0];
-        $type = explode(':', $type)[1];
-        $type = explode('/', $type)[1];
-        $newFilePath = '/uploads/' . date('Ymd') . '/' . $str . '.' . $type;
+        try{
+            $data = request()->param()['data'];
+            $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            $str = "";
+            for ($i = 0; $i < 8; $i++) {
+                $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+            }
+            $lujing = './uploads/' . date('Ymd');
+            if (!is_dir($lujing)) {
+                mkdir(iconv("UTF-8", "GBK", $lujing), 0777, true);
+            }
+            $type = explode(',', $data)[0];
+            $type = explode(';', $type)[0];
+            $type = explode(':', $type)[1];
+            $type = explode('/', $type)[1];
+            $newFilePath = '/uploads/' . date('Ymd') . '/' . $str . '.' . $type;
 
-        $dd = explode(',', $data)[1]; //得到post过来的二进制原始数据
-        if (empty($dd)) {
-            $data = file_get_contents("php://input");
+            $dd = explode(',', $data)[1]; //得到post过来的二进制原始数据
+            if (empty($dd)) {
+                $data = file_get_contents("php://input");
+            }
+            $r = file_put_contents('.' . $newFilePath, base64_decode($dd));
+            clearstatcache();
+            $temp = explode('/', $newFilePath);
+            $pics_big =  '/uploads/' . $temp[2] . '/thumb_800_' . $temp[3];
+            $pics_small = '/uploads/' .  $temp[2] .  '/thumb_400_' . $temp[3];
+            $image = Image::open('.' . $newFilePath);
+            $image->water('./logo.png',\think\Image::WATER_SOUTHEAST,100)->save('.' . $newFilePath);
+            $image = Image::open('.' . $newFilePath);
+            $image->thumb(1200, 1200)->save('.' . $pics_big);
+            $image->thumb(400, 400)->save('.' . $pics_small);
+            $row = [
+                'code' => 200,
+                'big' => 'api.jy1980.com'.$pics_big,
+                'small' => 'api.jy1980.com'.$pics_small,
+                'message'=>'操作成功'
+            ];
+        }catch (\Exception $e){
+            $row = [
+                'code' => 500,
+                'big' => null,
+                'small' => null,
+                'message'=>$e->getMessage()
+            ];
         }
-        $r = file_put_contents('.' . $newFilePath, base64_decode($dd));
-        clearstatcache();
-        $temp = explode('/', $newFilePath);
-        $pics_big =  '/uploads/' . $temp[2] . '/thumb_800_' . $temp[3];
-        $pics_small = '/uploads/' .  $temp[2] .  '/thumb_400_' . $temp[3];
-        $image = Image::open('.' . $newFilePath);
-        $image->water('./logo.png',\think\Image::WATER_SOUTHEAST,100)->save('.' . $newFilePath);
-        $image = Image::open('.' . $newFilePath);
-        $image->thumb(1200, 1200)->save('.' . $pics_big);
-        $image->thumb(400, 400)->save('.' . $pics_small);
-        $row = [
-            'code' => 200,
-            'big' => 'api.jy1980.com'.$pics_big,
-            'small' => 'api.jy1980.com'.$pics_small
-        ];
+
         return json($row);
     }
 

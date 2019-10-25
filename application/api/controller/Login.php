@@ -105,6 +105,29 @@ class Login extends Controller
         }
     }
 
+    public function authentication(){
+        try{
+            $id = input('param.id',0);
+            $num = $this->createNoncestr(8);
+            $time = input('param.sign');
+
+            if(strtotime($time)>strtotime('+3 minute')){
+                throw new \Exception('签名失效');
+            }
+
+            $re = Staff::get($id);
+
+            if(empty($re)){
+               throw new \Exception('员工不存在');
+            }
+            $re['ids']=Role::where('id',$re['job'])->value('ids');
+            session('user',$re);
+            cache($re['name'],$num,3600);
+            return json(['code'=>200,'num'=>$num,'re'=>$re]);
+        }catch (\Exception $e){
+            return json(['code'=>500,'message'=>$e->getMessage()]);
+        }
+    }
     /**
      * 获取验证码
      * @return \think\response\Json

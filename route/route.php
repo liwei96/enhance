@@ -11,7 +11,7 @@
 
 use think\facade\Route;
 
-Route::rule('/test','home/index/buy');
+Route::rule('/test','api/index/checkdong');
 Route::rule('/pro/create','api/project/create');
 
 
@@ -137,7 +137,8 @@ Route::group('index',[
     'sou'=>'api/index/sou',
     'lou'=>'api/index/lou',
     'jinfen'=>'api/index/jinfen',
-    'zhong'=>'api/index/zhong'
+    'zhong'=>'api/index/zhong',
+    'checkdong'=>'api/index/checkdong'
 ])->middleware('check');
 Route::group('integral',[
     'index'=>'api/integral/index',

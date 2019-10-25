@@ -21,7 +21,7 @@ class Staff extends Controller
     public function index()
     {
         //
-        $data=StaffModel::select();
+        $data=StaffModel::where('enable','eq',1)->select();
         foreach($data as $v){
             if(Role::where('id',$v['job'])->column('name')){
                 $v['job']=Role::where('id',$v['job'])->column('name')[0];
@@ -170,6 +170,7 @@ class Staff extends Controller
     public function sou(){
         $tiao=request()->param()['value'];
         $where=[];
+	$where['enable']=['enable','eq',1];
         if(array_key_exists('name',$tiao)){
             $where[]=['name','like','%'.$tiao['name'].'%'];
         }
@@ -221,7 +222,7 @@ class Staff extends Controller
     public function delete($id)
     {
         //
-        StaffModel::destroy($id);
+        StaffModel::where('id','eq',$id)->update(['enable'=>0]);
         $res=['code'=>200];
         return json($res);
     }
