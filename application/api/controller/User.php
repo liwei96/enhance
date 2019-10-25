@@ -42,6 +42,8 @@ class User extends Controller
             $where = ' where eu.status !=0 ';
             if($type == '公客'){
                 $where = $where.' and eu.s_id =0 ';// s_id 委托人ID
+            }else if($type == '所有'){
+
             }else{
                 if($super == 1){
                     $where = $where.' and s_id !=0 ';
@@ -177,18 +179,6 @@ class User extends Controller
                 $charge_id =  Db::table('erp_distribute')->where('userid',$item['id'])->value('charge_id')??0;
                 $time = empty($item['time'])?'': date('Y-m-d',strtotime($item['time']));
 
-<<<<<<< .mine
-                $origion_private = '';//原公
-                if(!empty($item['origin_delegate'])&&empty($item['s_id'])){
-                    $origion_private = '原私';
-                }elseif(empty($item['origin_delegate'])&&empty($item['s_id'])){
-                    $origion_private = '原公';
-                }
-
-                $finish = Db::table("erp_distribute")->where('userid',$item['id'])->value('finish');
-||||||| .r43
-                $time = empty($item['time'])?'': date('Y-m-d',strtotime($item['time']));
-=======
                 $origion_private = '';//原公
                 if(!empty($item['origin_delegate'])&&empty($item['s_id'])){
                     $origion_private = '原私';
@@ -198,7 +188,6 @@ class User extends Controller
 
                 }
 
->>>>>>> .r46
                 $dataAll[]=[
                     'isnow'=>date('Y-m-d')==date('Y-m-d',strtotime($follow_time))?1:0,
                     'peo'=>$item['s_id']==0? '公客':'私客',
@@ -214,17 +203,9 @@ class User extends Controller
                     'dai'=>$item['dai']??'',//带看标签
                     'label'=>$item['label']??'',
                     'id'=>$item['id'],
-<<<<<<< .mine
-                    'time'=>$time,
-                    'charge_id'=>empty($finish)?$charge_id:0,
-                    'origion_private'=>$origion_private
-||||||| .r43
-                    'time'=>$time
-=======
                     'time'=>$time,
                     'charge_id'=>$charge_id,
                     'origion_private'=>$origion_private
->>>>>>> .r46
                 ];
             }
 
@@ -352,37 +333,6 @@ class User extends Controller
      * @return \think\response\Json
      */
     public function changes($id){
-<<<<<<< .mine
-        try{
-            $user = UserModel::get($id);
-
-            //判断是否杭州地区
-            $in_area = false;
-            if(!empty($user->region)){
-                $regions = explode(',',$user->region);
-                $lst = Area::where('pid',1)->column('id');
-                foreach ($regions as $item){
-                    if(in_array($item,$lst)){
-                        $in_area = true;//在杭州的
-                        break;
-                    }
-                }
-            }
-             //在杭州的不可公转私
-            if(!empty($user->origin_delegate)&& empty($user->s_id)&&$in_area){
-                throw new \Exception('原私不可以公转私');
-            }
-
-            UserModel::update(['s_id'=>session('user.id')],['id'=>$id]);
-            return json(['code'=>200]);
-        }catch (\Exception $e){
-            return json(['code'=>500,'message'=>$e->getMessage()]);
-        }
-
-||||||| .r43
-        UserModel::update(['s_id'=>session('user.id')],['id'=>$id]);
-        return json(['code'=>200]);
-=======
         try{
             $user = UserModel::get($id);
             if(!empty($user->origin_delegate)&& empty($user->s_id)){
@@ -394,7 +344,6 @@ class User extends Controller
             return json(['code'=>500,'message'=>$e->getMessage()]);
         }
 
->>>>>>> .r46
     }
 
     public function change(){
@@ -466,14 +415,9 @@ class User extends Controller
         $data['origin_delegate'] = session('user.id');//原私标记
         $data['sid']=session('user.id');
         UserModel::create($data);
-<<<<<<< .mine
-
-||||||| .r43
-=======
 
         //
         Db::execute("UPDATE erp.erp_user set s_id=origin_delegate where FROM_UNIXTIME(create_time)>='2019-10-22' and origin_delegate>0");
->>>>>>> .r46
         return json(['code'=>200]);
     }
 
@@ -795,6 +739,8 @@ class User extends Controller
         $where[]=['status','eq',1];
         if($type =='公客'){
             $where[]=['s_id','eq',0];
+        }else if($type =='所有'){
+
         }else{
             if(session('user.super')==1){
                 $where[]=['s_id','neq','0'];

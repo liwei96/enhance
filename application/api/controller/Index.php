@@ -1015,32 +1015,30 @@ class Index
         $id=85;
         $data=Guide::where('s_id','eq',$id)->group('bid')->order('update_time','desc')->field('id,update_time,s_id,bid')->select();
         $time=time();
-        $name=[];
-        $name1=[];
-        $name2=[];
+        $name='';
+        $name1='';
+        $name2='';
         $num=0;
         $l=0;
         foreach($data as $v){
             if($time-strtotime($v['update_time'])>3600*24*7){
-                
                 $n=Building::where('id','eq',$v['bid'])->column('building_name')[0];
-                $name[]=$n;
+                $name.=$n.'-';
                 $num=1;
                 $l=1;
             }else if($time-strtotime($v['update_time'])>3600*24*6){
                 $n1=Building::where('id','eq',$v['bid'])->column('building_name')[0];
-                $name1[]=$n1;
+                $name1.=$n1.'-';
                 $l=2;
                 $num=1;
             }else if($time-strtotime($v['update_time'])>3600*24*5){
                 $n2=Building::where('id','eq',$v['bid'])->column('building_name')[0];
-                $name2[]=$n2;
+                $name2.=$n2.'-';
                 $l=2;
                 $num=1;
             }else{
                 Staff::where('id','eq',$id)->update(['check'=>0]);
             }
-            
         }
         if($l==1){
             Staff::where('id','eq',$id)->update(['check'=>2]);

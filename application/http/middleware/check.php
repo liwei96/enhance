@@ -74,7 +74,7 @@ class check
 
 
             if($data['num']==Cache::get($data['name'])){
-                if(Session::has('user')){
+                if(Session::get('user')){
                     Cache::set($data['name'],$data['num'],3600);
                     if($this->checkauth()){
                         $param = input('param.');
