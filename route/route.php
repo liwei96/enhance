@@ -13,6 +13,7 @@ use think\facade\Route;
 
 Route::rule('/test','api/index/checkdong');
 Route::rule('/pro/create','api/project/create');
+Route::rule('/index/checkdong','api/index/checkdong');
 
 
 Route::group('tuan',[
@@ -138,7 +139,7 @@ Route::group('index',[
     'lou'=>'api/index/lou',
     'jinfen'=>'api/index/jinfen',
     'zhong'=>'api/index/zhong',
-    'checkdong'=>'api/index/checkdong'
+    
 ])->middleware('check');
 Route::group('integral',[
     'index'=>'api/integral/index',

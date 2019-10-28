@@ -16,6 +16,16 @@ if(!function_exists('encrypt_password')){
         return md5(md5($pwd).$salt);
     }
 }
+
+function isEmail($email){
+    $mode = '/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/';
+    if(preg_match($mode,$email)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 /**
  * 是否是微信浏览器
  */

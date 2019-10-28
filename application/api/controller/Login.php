@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use EmailSend;
 use think\Controller;
 use think\facade\Cache;
 use think\facade\Session;
@@ -118,7 +119,7 @@ class Login extends Controller
             $re = Staff::get($id);
 
             if(empty($re)){
-               throw new \Exception('员工不存在');
+                throw new \Exception('员工不存在');
             }
             $re['ids']=Role::where('id',$re['job'])->value('ids');
             session('user',$re);
@@ -173,6 +174,55 @@ class Login extends Controller
                 'msg' => '发送失败'
             ];
             return json($res);
+        }
+    }
+
+
+    // 邮箱发送验证码
+    public function email(){
+        try{
+            $name = input('param.name');
+            $staff = Staff::where(['name'=>$name,'enable'=>1])->find();
+            if(empty($staff)){
+                throw new \Exception( '账号不存在或被禁用，请联系管理员');
+            }
+            $password = input('param.password');
+            if($staff->password!=encrypt_password($password)){
+                throw new \Exception( '请输入正确的账号或密码');
+            }
+            $email = input('param.email');
+            if(!isEmail($email)){
+                throw new \Exception('邮箱格式不正确');
+            }
+            if($staff->email!=$email){
+                throw new \Exception('邮箱已经绑定，绑定邮箱为'.$staff->email);
+            }
+            $code = mt_rand(1000,9999);//验证码
+            $register_time = cache($staff->urgent.'time') ? : 0;
+
+            //一分钟频率限制
+            if (time() - $register_time < 60) {
+              throw new \Exception('发送太频繁，稍后再试');
+            }
+
+            $title = 'ERP登录验证码';
+            $content = '您的验证码是【'.$code."】，请迅速填写，30分钟内有效！";
+            $res = EmailSend::getInstance()->send($email,$name,$title,$content);
+            if(empty($res)){
+                Cache::set($staff->urgent,$code,60*30);//30分钟有效
+            }else{
+                throw new \Exception('邮件发送失败:'.$res);
+            }
+            //一分钟有效
+            Cache::set($staff->urgent.'time',time(),60);
+            $staff->email = trim($email);
+            if(!$staff->save()){
+                throw new \Exception($staff->getError());
+            }
+
+            return json(['code'=>200,'message'=>'验证码已发送，会有延迟，请耐心等待']);
+        }catch (\Exception $e){
+            return json(['code'=>500,'message'=>$e->getMessage()]);
         }
     }
     /**

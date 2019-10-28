@@ -3,6 +3,7 @@ namespace app\api\controller;
 use think\Controller;
 use think\Request;
 use think\Db;
+use think\facade\Cache;
 use app\api\model\Staff;
 use app\api\model\User;
 use app\api\model\Dai;
@@ -1011,8 +1012,8 @@ class Index
 
     // 判断项目负责人动态跟新情况
     public function checkdong(){
-        // $id=session('user')['id'];
-        $id=85;
+        $id=session('user')['id'];
+        // $id=85;
         $data=Guide::where('s_id','eq',$id)->group('bid')->order('update_time','desc')->field('id,update_time,s_id,bid')->select();
         $time=time();
         $name='';
@@ -1020,21 +1021,25 @@ class Index
         $name2='';
         $num=0;
         $l=0;
+        $ids=[];
         foreach($data as $v){
             if($time-strtotime($v['update_time'])>3600*24*7){
                 $n=Building::where('id','eq',$v['bid'])->column('building_name')[0];
                 $name.=$n.'-';
                 $num=1;
                 $l=1;
+                $ids[]=$v['bid'];
             }else if($time-strtotime($v['update_time'])>3600*24*6){
                 $n1=Building::where('id','eq',$v['bid'])->column('building_name')[0];
                 $name1.=$n1.'-';
                 $l=2;
+                $ids[]=$v['bid'];
                 $num=1;
             }else if($time-strtotime($v['update_time'])>3600*24*5){
                 $n2=Building::where('id','eq',$v['bid'])->column('building_name')[0];
                 $name2.=$n2.'-';
                 $l=2;
+                $ids[]=$v['bid'];
                 $num=1;
             }else{
                 Staff::where('id','eq',$id)->update(['check'=>0]);
@@ -1044,11 +1049,14 @@ class Index
             Staff::where('id','eq',$id)->update(['check'=>2]);
         }else if($l==2){
             Staff::where('id','eq',$id)->update(['check'=>1]);
+        }else{
+            Staff::where('id','eq',$id)->update(['check'=>0]);
         }
         if($num==0){
             return json(['code'=>200,'msg'=>'正常']);
         }else{
-            return json(['code'=>202,'name1'=>$name1,'name2'=>$name2,'name'=>$name,'l'=>$l]);
+            Cache::set('check',$ids,7200);
+            return json(['code'=>202,'name1'=>$name1,'name2'=>$name2,'name'=>$name,'l'=>$l,'ids'=>$ids]);
         }
     }
 }

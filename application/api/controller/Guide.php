@@ -5,6 +5,7 @@ namespace app\api\controller;
 use think\Controller;
 use think\Request; 
 use think\Db; 
+use think\facade\Cache;
 use app\api\model\Guide as GuideModel;
 use app\api\model\Area;
 use app\api\model\Building;
@@ -74,8 +75,26 @@ class Guide extends Controller
         //     $a['bid']=$bid;
         //     Integral::create($a);
         // Record::create($data);
-        $res=['code'=>200];
-        return json($res);
+        $ids=[];
+        if(Cache::get('check')){
+            $ids=Cache::get('check');
+            
+            $key = array_search($bid, $ids);
+            if ($key !== false)
+            array_splice($ids, $key, 1);
+            Cache::set('check',$ids);
+            $count=count($ids);
+            if($count==0){
+                Staff::where('id','eq',$id)->update(['check'=>0]);
+                Cache::rm('check');
+            }else{
+                $ids=Cache::get('check');
+            }
+            
+            // dump($ids);die();
+        }
+        $ids=Cache::get('check');
+        return json(['code'=>200,'ids'=>$ids]);
     }
 
     /**

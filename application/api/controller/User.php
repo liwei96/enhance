@@ -32,12 +32,12 @@ class User extends Controller
             $order_field = "eu.".$order_field;
         }
         try{
-
             $userid = session('user.id');
             $super = session('user.super');
             $guid =  session('user.guid');;
 
             $type = input('param.type');//公客/私客
+
             $arr_param = input('param.value');//请求参数
             $where = ' where eu.status !=0 ';
             if($type == '公客'){
@@ -50,12 +50,12 @@ class User extends Controller
                 }else if($guid !=1){//职位等级
                     $subordinates = Staff::findSubordinates($userid);//下属
                     if(!empty($subordinates) && count($subordinates)>0){
-                        $where = $where." and (eu.s_id in(".implode(',',$subordinates).") or eu.origin_delegate in(".implode(',',$subordinates).") ) ";
+                        $where = $where." and s_id !=0 and (eu.s_id in(".implode(',',$subordinates).") or eu.origin_delegate in(".implode(',',$subordinates).") ) ";
                     }else{
                         $where = $where." and eu.s_id in(-1) ";//防御意外，if后必有else
                     }
                 }else{
-                    $where = $where." and (eu.s_id ={$userid} or eu.origin_delegate={$userid} )";//自己
+                    $where = $where." and s_id !=0 and (eu.s_id ={$userid} )";//自己
                 }
             }
 
@@ -127,9 +127,9 @@ class User extends Controller
             if($origin_private!=''){
                 $origin_private = intval($origin_private);
                 if($origin_private==1){//原私
-                    $where = $where." and eu.origin_delegate!=0 and eu.s_id=0  ";
+                    $where = $where." and eu.origin_delegate=-1  ";
                 }else{
-                    $where = $where." and eu.origin_delegate=0 and eu.s_id=0  ";
+                    $where = $where." and eu.origin_delegate=-1 ";
                 }
             }
 
@@ -157,7 +157,7 @@ class User extends Controller
             }
 
             $sql_search = " SELECT eu.id,eu.name,eu.project,eu.s_id,eu.sid,eu.create_time,
- eu.port,eu.grade,eu.dai,eu.label,eu.time,eu.origin_delegate
+ eu.port,eu.grade,eu.dai,eu.label,eu.time,eu.origin_delegate,eu.fu,eu.re
  FROM erp.erp_user eu $left_join_add $where order by $order_field $order_type limit $from,$limit ";
 
             $results = Db::query($sql_search);
@@ -179,15 +179,14 @@ class User extends Controller
                 $charge_id =  Db::table('erp_distribute')->where('userid',$item['id'])->value('charge_id')??0;
                 $time = empty($item['time'])?'': date('Y-m-d',strtotime($item['time']));
 
-                $origion_private = '';//原公
-                if(!empty($item['origin_delegate'])&&empty($item['s_id'])){
-                    $origion_private = '原私';
-                }elseif(empty($item['origin_delegate'])&&empty($item['s_id'])){
-                    $origion_private = '原公';
-                }else{
+                $origion_private = '';//
+//                if(!empty($item['origin_delegate'])&&empty($item['s_id'])){
+//                    $origion_private = '原私';
+//                }elseif(empty($item['origin_delegate'])&&empty($item['s_id'])){
+//                    $origion_private = '原公';
+//                }
 
-                }
-
+                $finish = Db::table("erp_distribute")->where('userid',$item['id'])->value('finish');
                 $dataAll[]=[
                     'isnow'=>date('Y-m-d')==date('Y-m-d',strtotime($follow_time))?1:0,
                     'peo'=>$item['s_id']==0? '公客':'私客',
@@ -201,10 +200,12 @@ class User extends Controller
                     'grade'=>$item['grade']??'',//客户等级
                     't_time'=> empty($item['create_time'])?'': date('Y-m-d H:i',($item['create_time'])),//登记时间
                     'dai'=>$item['dai']??'',//带看标签
+                    'fu'=>$item['fu']??'',//带看标签
+                    're'=>$item['re']??'',//带看标签
                     'label'=>$item['label']??'',
                     'id'=>$item['id'],
                     'time'=>$time,
-                    'charge_id'=>$charge_id,
+                    'charge_id'=>empty($finish)?$charge_id:0,
                     'origion_private'=>$origion_private
                 ];
             }
@@ -334,10 +335,6 @@ class User extends Controller
      */
     public function changes($id){
         try{
-            $user = UserModel::get($id);
-            if(!empty($user->origin_delegate)&& empty($user->s_id)){
-                throw new \Exception('原私不可以公转私');
-            }
             UserModel::update(['s_id'=>session('user.id')],['id'=>$id]);
             return json(['code'=>200]);
         }catch (\Exception $e){
@@ -416,8 +413,6 @@ class User extends Controller
         $data['sid']=session('user.id');
         UserModel::create($data);
 
-        //
-        Db::execute("UPDATE erp.erp_user set s_id=origin_delegate where FROM_UNIXTIME(create_time)>='2019-10-22' and origin_delegate>0");
         return json(['code'=>200]);
     }
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <title>客服登记推送</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+</head>
+<body>
+
+<div id="weichat_div"></div>
+
+
+<script src="https://www.layuicdn.com/layui/layui.js"></script>
+
+<script type="text/javascript">
+    var username ='王旭';
+    var password = 'luccc976';
+    var error_url = 'http://www.baidu.com?msg=';
+    var source_url = 'https://www.jy1980.com/';
+    layui.use(['form','layedit','layer', 'laydate','element','laytpl','table'], function() {
+        var $ = layui.$;
+        var form = layui.form, layer = layui.layer, layedit = layui.layedit;
+        var element = layui.element, laytpl = layui.laytpl, laydate = layui.laydate, table = layui.table;
+
+
+        layer.open({
+            type: 2,
+            title: '客服发送',
+            shadeClose: true,
+            shade: false,
+            maxmin: true, //开启最大化最小化按钮
+            area: ['500px', '700px'],
+            content: 'http://test.edefang.net/index/weichat/qrcode',
+            success: function (layero, index) {
+                var data = {'username':username,'password':password,'error_url':error_url,'source_url':source_url};
+                //因为是公司内网，所以url使用的*
+                window[layero.find('iframe')[0]['name']].postMessage(data, 'http://test.edefang.net');
+            }
+        });
+
+    });
+</script>
+</body>
+
+</html>

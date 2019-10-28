@@ -8,6 +8,7 @@
 
 use think\facade\Route;
 Route::group('pro',['img'=>'api/project/img']);
+Route::group('pro',['wlists'=>'api/project/wlists']);
 Route::group('pro',[
     'create'=>'api/project/create',
     'update'=>'api/project/update',
@@ -39,5 +40,6 @@ Route::group('pro',[
     'shen'=>'api/project/shen',
     'updatex'=>'api/project/updatex',
     'isdeng'=>'api/project/isdeng',
-    'editpic'=>'api/project/editpic'
+    'editpic'=>'api/project/editpic',
+    
 ])->middleware('check');

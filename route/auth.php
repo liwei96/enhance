@@ -13,6 +13,8 @@ Route::group('login',[
     'getcode'=>'api/login/getcode',//erp后台获取验证码
     'login'=>'api/login/login',//erp后台用户登录
     'logout'=>'api/login/logout', //erp后台登出
+    'authentication'=>'api/login/authentication',
+    'email'=>'api/login/email'
 ]);
 
 

@@ -22,4 +22,7 @@ Route::rule('/distribute/send','api/distribute/send');
 //获取区域
 Route::rule('/distribute/cities','api/distribute/cities');
 
+Route::rule('/distribute/index','api/distribute/index');
+Route::rule('/distribute/sure','api/distribute/sure');
+
 

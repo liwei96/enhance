@@ -17,6 +17,8 @@ use app\api\model\User;
 use \FilterWord;
 class Weichat extends Controller
 {
+
+
     /**
      * 敏感词校验接口
      * @return \think\response\Json

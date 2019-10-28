@@ -80,6 +80,39 @@ class Project extends Controller
         ];
         return json($res);
     }
+
+
+    // 未及时跟新动态的列表
+    public function wlists(){
+        $ids=request()->param('ids');
+        $data=Building::where('id','in',$ids)->select();
+        foreach ($data as $v) {
+            $n = Area::where('id', $v['cate_id'])->column('pid');
+            if($n){
+                $n=$n[0];
+                $s = Area::where('id', $n)->column('pid')[0];
+                $v['city'] = Area::where('id', $n)->column('area_name')[0];
+                $v['provice'] = Area::where('id', $s)->column('area_name')[0];
+            }
+            $v['jin']=User::where('project','eq',$v['id'])->count('id');
+            $v['dai']=Dai::where('project','eq',$v['id'])->count('id');
+            $l=Guide::where('bid','eq',$v['id'])->limit(0,1)->column('s_id');
+            if($l){
+                $l=$l[0];
+                $k=Staff::where('id','eq',$l)->column('name');
+                if($k){
+                    $v['fu']=$k[0];
+                }else{
+                    $v['fu']='';
+                }
+            }else{
+                $v['fu']='';
+            }
+        }
+        return json(['code'=>200,'data'=>$data]);
+    }
+
+
     public function dlist($id)
     {
         $ids = Building::where('id', $id)->column('d_id')[0];
