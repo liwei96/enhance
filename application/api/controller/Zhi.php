@@ -251,4 +251,6 @@ order by create_time DESC";
         Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
         return json(['code'=>200]);
     }
+
+    // 
 }

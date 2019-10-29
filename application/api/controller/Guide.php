@@ -63,8 +63,17 @@ class Guide extends Controller
         Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
         $data['bid']=$bid;
         $data['gid']=$ma;
-        $data['s_id']=session('user.id');
+        $l=Guide::where('bid','eq',$v['id'])->limit(1)->column('s_id');
+        if($l){
+            $data['s_id']=$l[0];
+        }else{
+            $sid=session('user.id');
+            $data['s_id']=$sid;
+        }
+        
+        
         GuideModel::create($data);
+        Building::where('id','eq',$bid)->update(['old'=>0]);
         // $i=Integral::where([['id','eq',session('user.id')],['bid','eq',$bid]])->order('id','desc')->paginate(1);
         // $i=$i[0];
         // $a=[];
@@ -78,7 +87,9 @@ class Guide extends Controller
         $ids=[];
         if(Cache::get('check')){
             $ids=Cache::get('check');
-            
+            $sid=Staff::where('id','eq',$data['s_id'])->column('pid')[0];
+            $iid = Db::name('erp_guide')->getLastInsID();
+            GuideModel::where('id','eq',$iid)->update(['sid'=>$sid]);
             $key = array_search($bid, $ids);
             if ($key !== false)
             array_splice($ids, $key, 1);
@@ -86,6 +97,7 @@ class Guide extends Controller
             $count=count($ids);
             if($count==0){
                 Staff::where('id','eq',$id)->update(['check'=>0]);
+
                 Cache::rm('check');
             }else{
                 $ids=Cache::get('check');
@@ -97,6 +109,14 @@ class Guide extends Controller
         return json(['code'=>200,'ids'=>$ids]);
     }
 
+
+    public function fus(){
+        $sid=session('user.id');
+        $did=Staff::where('id','eq',$sid)->column('department')[0];
+        $pid=Staff::where([['department','eq',$did],['job','eq',28]])->field('id,name')->select();
+        return json(['code'=>200,'fu'=>$pid]);
+    }
+    
     /**
      * 显示指定的资源
      *
@@ -148,8 +168,8 @@ class Guide extends Controller
         GuideModel::update($data,['id'=>$id]);
         $gid=$data['gid'];
 
-        Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods.tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
-        Db::connect(config(''))->table('tpshop_goods.tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
+        Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
+        Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_text')->where('gid','eq',$gid)->update(['introduce'=>$data['introduce']]);
         $res=['code'=>200];
         return json($res);
     }

@@ -131,18 +131,32 @@ class Staff extends Controller
         //
         $data=$request->param()['value'];
         $job=Role::where('name','eq',$data['job'])->column('id');
-	
+        $city=Qu::where('name','eq',$data['city'])->column('id');
+        $area=Qu::where('name','eq',$data['area'])->column('id');
+        $department=Qu::where('name','eq',$data['department'])->column('id');
+        $pid=Staff::where('name','eq',$data['pid'])->column('id');
+        
         if($job){
             $data['job']=$job[0];
+        }
+        if($city){
+            $data['city']=$city[0];
+        }
+        if($area){
+            $data['area']=$area[0];
+        }
+        if($department){
+            $data['department']=$department[0];
+        }
+        if($pid){
+            $data['pid']=$pid[0];
         }
         $data['id']=$id;
 	
         if(array_key_exists('pid',$data)){
-	    if($data['pid']==[]){
-		$data['pid']=0;
-		
-	    }
-            
+            if($data['pid']==[]){
+                $data['pid']=0;
+            }
         }
 	
         Db::table('erp_staff')->where('id',$id)->update($data);

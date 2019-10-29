@@ -1011,7 +1011,7 @@ class Index
     }
 
     // 判断项目负责人动态跟新情况
-    public function checkdong(){
+    public function checkdong(){        
         $id=session('user')['id'];
         // $id=85;
         $data=Guide::where('s_id','eq',$id)->group('bid')->order('update_time','desc')->field('id,update_time,s_id,bid')->select();
@@ -1055,6 +1055,7 @@ class Index
         if($num==0){
             return json(['code'=>200,'msg'=>'正常']);
         }else{
+            Building::where('id','in',$ids)->update(['old'=>1]);
             Cache::set('check',$ids,7200);
             return json(['code'=>202,'name1'=>$name1,'name2'=>$name2,'name'=>$name,'l'=>$l,'ids'=>$ids]);
         }

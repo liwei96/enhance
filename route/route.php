@@ -43,7 +43,8 @@ Route::group('guide',[
     'edit'=>'api/guide/edit',
     'update'=>'api/guide/update',
     'delete'=>'api/guide/delete',
-    'tong'=>'api/guide/tong'
+    'tong'=>'api/guide/tong',
+    'fus'=>'api/guide/fus'
 ])->middleware('check');
 
 
