@@ -165,7 +165,7 @@ class Export extends Controller
 
         // dump($n);
         // Db::name('staff')->insertAll($data,true);
-        $data=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where('sid','eq',124)->update(['sid'=>97]);
+        $data=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where('s_id','eq',116)->update(['sid'=>95,'s_id'=>95]);
         dump($data);die();
         // Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where('sid','eq',131)->update(['sid'=>125,'s_id'=>125]);
 

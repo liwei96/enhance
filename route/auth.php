@@ -14,7 +14,9 @@ Route::group('login',[
     'login'=>'api/login/login',//erp后台用户登录
     'logout'=>'api/login/logout', //erp后台登出
     'authentication'=>'api/login/authentication',
-    'email'=>'api/login/email'
+    'email'=>'api/login/email',
+    'sure'=>'api/login/sure',
+    'getemail'=>'api/login/getemail'
 ]);
 
 

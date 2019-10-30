@@ -1014,7 +1014,7 @@ class Index
     public function checkdong(){        
         $id=session('user')['id'];
         // $id=85;
-        $data=Guide::where('s_id','eq',$id)->group('bid')->order('update_time','desc')->field('id,update_time,s_id,bid')->select();
+        $data=Guide::where('s_id','eq',$id)->group('bid')->order('update_time','asc')->field('id,update_time,s_id,bid')->select();
         $time=time();
         $name='';
         $name1='';
@@ -1025,24 +1025,33 @@ class Index
         foreach($data as $v){
             if($time-strtotime($v['update_time'])>3600*24*7){
                 $n=Building::where('id','eq',$v['bid'])->column('building_name')[0];
+                Building::where('id','eq',$v['bid'])->update(['old'=>3]);
                 $name.=$n.'-';
                 $num=1;
                 $l=1;
                 $ids[]=$v['bid'];
             }else if($time-strtotime($v['update_time'])>3600*24*6){
                 $n1=Building::where('id','eq',$v['bid'])->column('building_name')[0];
+                Building::where('id','eq',$v['bid'])->update(['old'=>2]);
                 $name1.=$n1.'-';
                 $l=2;
                 $ids[]=$v['bid'];
                 $num=1;
             }else if($time-strtotime($v['update_time'])>3600*24*5){
                 $n2=Building::where('id','eq',$v['bid'])->column('building_name')[0];
+                Building::where('id','eq',$v['bid'])->update(['old'=>1]);
                 $name2.=$n2.'-';
                 $l=2;
                 $ids[]=$v['bid'];
                 $num=1;
             }else{
                 Staff::where('id','eq',$id)->update(['check'=>0]);
+            }
+            $old=Building::where('id','eq',$v['bid'])->column('old');
+            if($old){
+                if($old[0]==4){
+                    $ids[]=$v['bid'];
+                }
             }
         }
         if($l==1){
@@ -1052,6 +1061,7 @@ class Index
         }else{
             Staff::where('id','eq',$id)->update(['check'=>0]);
         }
+        
         if($num==0){
             return json(['code'=>200,'msg'=>'正常']);
         }else{

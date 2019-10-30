@@ -50,7 +50,7 @@ class User extends Controller
                 }else if($guid !=1){//职位等级
                     $subordinates = Staff::findSubordinates($userid);//下属
                     if(!empty($subordinates) && count($subordinates)>0){
-                        $where = $where." and s_id !=0 and (eu.s_id in(".implode(',',$subordinates).") or eu.origin_delegate in(".implode(',',$subordinates).") ) ";
+                        $where = $where." and s_id !=0 and (eu.s_id in(".implode(',',$subordinates).") ) ";
                     }else{
                         $where = $where." and eu.s_id in(-1) ";//防御意外，if后必有else
                     }

@@ -106,6 +106,46 @@ class Login extends Controller
         }
     }
 
+    /**
+     * 邮箱确认
+     * @return \think\response\Json
+     */
+    public function sure(){
+        try{
+
+            $username = input('param.name');
+            $password = input('param.password');
+            $check_code = input('param.code');
+
+            //验签
+//            $time = input('param.sign');
+//            if(strtotime($time)>strtotime('+3 minute')){
+//                throw new \Exception('签名失效');
+//            }
+
+            //员工校验
+            $staff = Staff::where(['name'=>$username,'enable'=>1])->find();
+            if(empty($staff)){
+                throw new \Exception('该员工不存在或被禁用，请联系管理员');
+            }
+            if(encrypt_password($password)!=$staff->password){
+                throw new \Exception('密码错误');
+            }
+            $code = Cache::get($staff->urgent);
+            if($check_code!=$code){
+                throw new \Exception('验证码不正确');
+            }
+
+            $num = $this->createNoncestr(8);
+            session('user',$staff);
+            cache($staff->name,$num,3600);
+
+            return json(['code'=>200,'message'=>'登录成功','name'=>$staff->name,'num'=>$num]);
+        }catch (\Exception $e){
+            return json(['code'=>500,'message'=>$e->getMessage()]);
+        }
+    }
+
     public function authentication(){
         try{
             $id = input('param.id',0);
@@ -178,7 +218,10 @@ class Login extends Controller
     }
 
 
-    // 邮箱发送验证码
+    /**
+     * 邮箱发送验证码
+     * @return \think\response\Json
+     */
     public function email(){
         try{
             $name = input('param.name');
@@ -197,7 +240,7 @@ class Login extends Controller
             if($staff->email!=$email){
                 throw new \Exception('邮箱已经绑定，绑定邮箱为'.$staff->email);
             }
-            $code = mt_rand(1000,9999);//验证码
+            $code = mt_rand(100000,999999);//验证码
             $register_time = cache($staff->urgent.'time') ? : 0;
 
             //一分钟频率限制
@@ -221,6 +264,28 @@ class Login extends Controller
             }
 
             return json(['code'=>200,'message'=>'验证码已发送，会有延迟，请耐心等待']);
+        }catch (\Exception $e){
+            return json(['code'=>500,'message'=>$e->getMessage()]);
+        }
+    }
+
+    /**
+     * 获得email
+     * @return \think\response\Json
+     */
+    public function getemail(){
+        try{
+            $name = input('param.name');
+            $staff = Staff::where(['name'=>$name,'enable'=>1])->find();
+            if(empty($staff)){
+                throw new \Exception( '账号不存在或被禁用，请联系管理员');
+            }
+
+            if(empty($staff->email)){
+                throw new \Exception('邮箱未绑定');
+            }
+
+            return json(['code'=>200,'message'=>'获取成功','email'=>$staff->email]);
         }catch (\Exception $e){
             return json(['code'=>500,'message'=>$e->getMessage()]);
         }

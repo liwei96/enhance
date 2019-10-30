@@ -63,7 +63,7 @@ class Guide extends Controller
         Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
         $data['bid']=$bid;
         $data['gid']=$ma;
-        $l=Guide::where('bid','eq',$v['id'])->limit(1)->column('s_id');
+        $l=GuideModel::where('bid','eq',$bid)->limit(1)->column('s_id');
         if($l){
             $data['s_id']=$l[0];
         }else{
@@ -97,12 +97,11 @@ class Guide extends Controller
             $count=count($ids);
             if($count==0){
                 Staff::where('id','eq',$id)->update(['check'=>0]);
-
                 Cache::rm('check');
             }else{
                 $ids=Cache::get('check');
             }
-            
+           
             // dump($ids);die();
         }
         $ids=Cache::get('check');

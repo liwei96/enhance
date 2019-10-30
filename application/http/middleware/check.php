@@ -75,10 +75,10 @@ class check
 
             if($data['num']==Cache::get($data['name'])){
                 if(Session::get('user')){
-                    Cache::set($data['name'],$data['num'],3600);
-                    $check=Staff::where('id','eq',Session::get('user')['id'])->column('check')[0];
-                    $controller=request()->controller();
-                    $action=request()->action(); 
+                    cache($data['name'],$data['num'],3600);
+//                    $check=Staff::where('id','eq',Session::get('user')['id'])->column('check')[0];
+//                    $controller=request()->controller();
+//                    $action=request()->action();
                     // if($controller!='Index' && $action != 'save'){
                     //     if($check == 2){
                     //         return json(['code'=>'303','msg'=>'有超过7天未更新的动态，不能访问']);
@@ -91,7 +91,6 @@ class check
                         $ll['userid'] = session('user.id');
                         Log::create($ll);
 
-                        // cache($data['name'],$data['num'],3600);
                         return $next($request);
                     }else{
                         return json(['code'=>'403','msg'=>'没有权限']);
