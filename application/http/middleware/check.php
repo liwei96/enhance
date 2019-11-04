@@ -90,7 +90,6 @@ class check
                         $ll['param']= json_encode($param,JSON_UNESCAPED_UNICODE);
                         $ll['userid'] = session('user.id');
                         Log::create($ll);
-
                         return $next($request);
                     }else{
                         return json(['code'=>'403','msg'=>'没有权限']);

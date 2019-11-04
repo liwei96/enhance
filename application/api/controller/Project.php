@@ -60,18 +60,8 @@ class Project extends Controller
             }
             $v['jin']=User::where('project','eq',$v['id'])->count('id');
             $v['dai']=Dai::where('project','eq',$v['id'])->count('id');
-            $l=Guide::where('bid','eq',$v['id'])->limit(0,1)->column('s_id');
-            if($l){
-                $l=$l[0];
-                $k=Staff::where('id','eq',$l)->column('name');
-                if($k){
-                    $v['fu']=$k[0];
-                }else{
-                    $v['fu']='';
-                }
-            }else{
-                $v['fu']='';
-            }
+            $v['fu']= Staff::where('id',$v['charge_id'])->value('name')??'';
+
         }
         $res=[
             'code'=>200,
@@ -85,7 +75,9 @@ class Project extends Controller
     // 未及时跟新动态的列表
     public function wlists(){
         $ids=request()->param('ids');
-        $data=Building::where('id','in',$ids)->select();
+        // $data=Building::where('id','in',$ids)->where('old','in',[1,2,3])->select();
+        $data=Building::where([['id','in',$ids],['old','in',[1,2,3]],['status','eq',0]])->select();
+        $num=Building::where([['id','in',$ids],['old','in',[1,2,3]],['status','eq',0]])->count('*');
         foreach ($data as $v) {
             $n = Area::where('id', $v['cate_id'])->column('pid');
             if($n){
@@ -109,7 +101,66 @@ class Project extends Controller
                 $v['fu']='';
             }
         }
-        return json(['code'=>200,'data'=>$data]);
+        return json(['code'=>200,'data'=>$data,'num'=>$num,'ids'=>$ids]);
+    }
+
+    // 未审核的动态列表
+    public function wdongs(){
+        $ids=request()->param('ids');
+        $data=Building::where('id','in',$ids)->where('status','eq',1)->field('id,building_name')->select();
+        $num=Building::where('id','in',$ids)->where('status','eq',1)->count('*');
+        foreach($data as $v){
+            $gs=Guide::where('bid','eq',$v['id'])->where('status','eq',1)->find();
+            $id=$gs['s_id'];
+            
+            $v['name']=Staff::where('id','eq',$id)->column('name')[0];
+            $v['status']=$gs['status'];
+            $v['gid']=$gs['id'];
+            $v['time']=$gs['update_time'];
+        }
+        return json(['code'=>200,'data'=>$data,'num'=>$num,'ids'=>$ids]);
+    }
+
+    // 未通过的动态列表
+    public function bdongs(){
+        $ids=request()->param('ids');
+        $data=Building::where('id','in',$ids)->where('status','eq',2)->field('id,building_name')->select();
+        $num=Building::where('id','in',$ids)->where('status','eq',2)->count('*');
+        foreach($data as $v){
+            $gs=Guide::where('bid','eq',$v['id'])->where('status','eq',2)->find();
+            $id=$gs['s_id'];
+            
+            $v['name']=Staff::where('id','eq',$id)->column('name')[0];
+            $v['status']=$gs['status'];
+            $v['gid']=$gs['id'];
+            $v['time']=$gs['update_time'];
+        }
+        return json(['code'=>200,'data'=>$data,'num'=>$num,'ids'=>$ids]);
+    }
+
+    // 已通过的动态列表
+    public function tongs(){
+        $ids=request()->param('ids');
+        // $data=Building::where('id','in',$ids)->where('status','eq',0)->field('id,building_name')->select();
+        $data=Building::where([['id','in',$ids],['status','eq',0],['old','eq',0]])->field('id,building_name')->select();
+        // $num=Building::where('id','in',$ids)->where('status','eq',0)->count('*');
+        $num=Building::where([['id','in',$ids],['status','eq',0],['old','eq',0]])->count('*');
+        // dump($data);die();
+        foreach($data as $v){
+            $gs=Guide::where('bid','eq',$v['id'])->where('status','eq',0)->order('id','desc')->find();
+            $id=$gs['s_id'];
+            
+            $v['name']=Staff::where('id','eq',$id)->column('name');
+            if($v['name']){
+                $v['name']=$v['name'][0];
+            }else{
+                $v['name']='没有';
+            }
+            $v['status']=$gs['status'];
+            $v['gid']=$gs['id'];
+            $v['time']=$gs['update_time'];
+        }
+        return json(['code'=>200,'data'=>$data,'num'=>$num,'ids'=>$ids]);
     }
 
 
@@ -560,11 +611,9 @@ class Project extends Controller
                 $where[] = ['building_name', 'like', '%' . $ss['building_name'] . '%'];
             }
         }
-        if (array_key_exists('cate_id',$ss)) {
-            if($ss['cate_id']){
-                $l=$ss['cate_id'][2];
-                $id=Area::where('area_name','eq',$l)->column('id')[0];
-                $where[] = ['cate_id', 'eq', $id];
+        if (array_key_exists('branch',$ss)) {
+            if($ss['branch']){
+                $where[] = ['branch', 'eq', $ss['branch']];
             }
         }
         if (array_key_exists('type',$ss)) {
@@ -586,6 +635,15 @@ class Project extends Controller
                 $where[] = ['waixiao', 'eq', $ss['waixiao']];
             }
         }
+        if (array_key_exists('fu',$ss)) {
+            if($ss['fu']){
+                if($ss['fu']=='是'){
+                    $ids=Guide::where('s_id','eq',session('user')['id'])->column('bid');
+                    $where[] = ['id', 'in', $ids];
+                }
+                
+            }
+        }
         $data = Building::where($where)->limit($y*$n,$n)->select();
         foreach ($data as $v) {
             $n = Area::where('id', $v['cate_id'])->column('pid');
@@ -597,19 +655,7 @@ class Project extends Controller
             }
             $v['jin']=User::where('project','eq',$v['id'])->count('id');
             $v['dai']=Dai::where('project','eq',$v['id'])->count('id');
-            $l=Guide::where('bid','eq',$v['id'])->limit(0,1)->column('s_id');
-            if($l){
-                $l=$l[0];
-                $k=Staff::where('id','eq',$l)->column('name');
-                if($k){
-                    $v['fu']=$k[0];
-                }else{
-                    $v['fu']='';
-                }
-                
-            }else{
-                $v['fu']='';
-            }
+            $v['fu']= Staff::where('id',$v['charge_id'])->value('name')??'';
         }
         $num=Building::where($where)->count('id');
         $res = [
@@ -637,6 +683,16 @@ class Project extends Controller
         $dd['humianji']=explode(',',$dd['humianji']);
         $dd['zongjia']=explode(',',$dd['zongjia']);
         $dd['hetong'] = explode(',', $dd['hetong']);
+
+
+        if(!empty(  $dd['building_img'])){
+            $building_img = $dd['building_img'];
+            $header_str = 'api.jy1980.com';
+            if(strpos($building_img,$header_str)===false){
+                $dd['building_img'] = $header_str.$building_img;
+            }
+        }
+
         $one = Area::where('id', $dd['cate_id'])->find();
         $two = Area::where('id', $one['pid'])->find();
         $thr = Area::where('id', $two['pid'])->column('area_name');
@@ -1180,6 +1236,8 @@ class Project extends Controller
         return json($res);
     }
 
+
+
     public function img()
     {
         try{
@@ -1227,7 +1285,49 @@ class Project extends Controller
                 'message'=>$e->getMessage()
             ];
         }
+        return json($row);
+    }
 
+    public function img_api()
+    {
+
+        try{
+            $data = urldecode(input('param.data'));
+            if(empty($data)){
+                throw new \Exception('空文件');
+            }
+
+            $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            $str = "";
+            for ($i = 0; $i < 8; $i++) {
+                $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+            }
+            $lujing = './uploads/' . date('Ymd');
+            if (!is_dir($lujing)) {
+                mkdir(iconv("UTF-8", "GBK", $lujing), 0777, true);
+            }
+
+            $type = input('param.type');
+            $newFilePath = '/uploads/' . date('Ymd') . '/' . $str . '.' . $type;
+
+            $r = file_put_contents('.' . $newFilePath, base64_decode($data));
+
+            if($r==false){
+                throw new \Exception('新文件写入失败');
+            }
+
+            $row = [
+                'code' => 200,
+                'picture' => 'api.jy1980.com'.$newFilePath,
+                'message'=>'操作成功'
+            ];
+        }catch (\Exception $e){
+            $row = [
+                'code' => 500,
+                'picture' => null,
+                'message'=>$e->getMessage()
+            ];
+        }
         return json($row);
     }
 

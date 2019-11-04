@@ -9,3 +9,5 @@
 use think\facade\Route;
 
 Route::rule('tool/email','api/email/send');
+
+Route::rule('option/sources','api/option/sources');

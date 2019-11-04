@@ -100,13 +100,18 @@ INNER JOIN erp.erp_qu q on q.id = s.area and ( s.pid= $charge_id or s.pid in(SEL
             $userid = input('param.userid');
             $staffid = input('param.staffid');
 
+            if(empty($staffid)||empty($userid)){
+                throw new \Exception('参数错误');
+            }
+
             $timestamp = input('param.sign');
             if(date('Y-m-d',$timestamp) != date('Y-m-d')){
                 throw new \Exception('加密验签错误');
             }
 
             $result = User::update([
-                's_id' => $staffid
+                's_id' => $staffid,
+                'sid'=>$staffid
             ],['id' => $userid]);
 
             if(!$result){

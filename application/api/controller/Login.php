@@ -140,6 +140,9 @@ class Login extends Controller
             session('user',$staff);
             cache($staff->name,$num,3600);
 
+            $staff['ids']=Role::where('id',$staff->job)->value('ids');
+            session('user',$staff);
+
             return json(['code'=>200,'message'=>'登录成功','name'=>$staff->name,'num'=>$num]);
         }catch (\Exception $e){
             return json(['code'=>500,'message'=>$e->getMessage()]);
@@ -237,7 +240,7 @@ class Login extends Controller
             if(!isEmail($email)){
                 throw new \Exception('邮箱格式不正确');
             }
-            if($staff->email!=$email){
+            if(!empty($staff->email)&&$staff->email!=$email){
                 throw new \Exception('邮箱已经绑定，绑定邮箱为'.$staff->email);
             }
             $code = mt_rand(100000,999999);//验证码

@@ -13,6 +13,9 @@ use think\facade\Route;
 
 Route::rule('/test','api/index/checkdong');
 Route::rule('/pro/create','api/project/create');
+Route::rule('/guide/editdong','api/guide/editdong');
+Route::rule('/guide/shent','api/guide/shent');
+Route::rule('/guide/shenb','api/guide/shenb');
 Route::rule('/index/checkdong','api/index/checkdong');
 
 

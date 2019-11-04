@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\api\model\Building;
 use function Complex\negative;
 use think\Controller;
 use think\Request;
@@ -249,8 +250,7 @@ order by create_time DESC";
         $bid=request()->param('bid');
         $id=request()->param('id');
         Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
+        Building::update(['charge_id'=>$id],['id'=>$bid]);
         return json(['code'=>200]);
     }
-
-    // 
 }

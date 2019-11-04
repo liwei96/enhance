@@ -8,7 +8,11 @@
 
 use think\facade\Route;
 Route::group('pro',['img'=>'api/project/img']);
+Route::group('pro',['imgapi'=>'api/project/img_api']);
 Route::group('pro',['wlists'=>'api/project/wlists']);
+Route::group('pro',['wdongs'=>'api/project/wdongs']);
+Route::group('pro',['tongs'=>'api/project/tongs']);
+Route::group('pro',['bdongs'=>'api/project/bdongs']);
 Route::group('pro',[
     'create'=>'api/project/create',
     'update'=>'api/project/update',

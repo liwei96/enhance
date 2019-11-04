@@ -16,7 +16,9 @@ Route::group('login',[
     'authentication'=>'api/login/authentication',
     'email'=>'api/login/email',
     'sure'=>'api/login/sure',
-    'getemail'=>'api/login/getemail'
+    'getemail'=>'api/login/getemail',
+    'weichatjudge'=>'api/weichat/bindingjudge',
+    'weichatsure'=>'api/weichat/sure'
 ]);
 
 

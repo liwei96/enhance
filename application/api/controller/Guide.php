@@ -59,21 +59,30 @@ class Guide extends Controller
         $list['gid']=$ma;
         $list['create_time']=time();
         $list['update_time']=time();
+        $l=GuideModel::where('bid','eq',$bid)->limit(1)->column('s_id');
         Db::connect('db_config1')->table('tpshop.tpshop_text')->insert($list);
         Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
         $data['bid']=$bid;
         $data['gid']=$ma;
-        $l=GuideModel::where('bid','eq',$bid)->limit(1)->column('s_id');
+        
+        
         if($l){
             $data['s_id']=$l[0];
+            
         }else{
             $sid=session('user.id');
             $data['s_id']=$sid;
         }
-        
-        
+        if(session('user.id')==150 && session('user.id')==126){
+            $data['status']=0;
+            Building::where('id','eq',$bid)->update(['status'=>0]);
+        }else{
+            $data['status']=1;
+            Building::where('id','eq',$bid)->update(['status'=>1]);
+        }
+        // dump($data);die();
         GuideModel::create($data);
-        Building::where('id','eq',$bid)->update(['old'=>0]);
+        
         // $i=Integral::where([['id','eq',session('user.id')],['bid','eq',$bid]])->order('id','desc')->paginate(1);
         // $i=$i[0];
         // $a=[];
@@ -85,25 +94,25 @@ class Guide extends Controller
         //     Integral::create($a);
         // Record::create($data);
         $ids=[];
-        if(Cache::get('check')){
-            $ids=Cache::get('check');
-            $sid=Staff::where('id','eq',$data['s_id'])->column('pid')[0];
-            $iid = Db::name('erp_guide')->getLastInsID();
-            GuideModel::where('id','eq',$iid)->update(['sid'=>$sid]);
-            $key = array_search($bid, $ids);
-            if ($key !== false)
-            array_splice($ids, $key, 1);
-            Cache::set('check',$ids);
-            $count=count($ids);
-            if($count==0){
-                Staff::where('id','eq',$id)->update(['check'=>0]);
-                Cache::rm('check');
-            }else{
-                $ids=Cache::get('check');
-            }
+        // if(Cache::get('check')){
+            // $ids=Cache::get('check');
+        //     $sid=Staff::where('id','eq',$data['s_id'])->column('pid')[0];
+        //     $iid = Db::name('erp_guide')->getLastInsID();
+        //     GuideModel::where('id','eq',$iid)->update(['sid'=>$sid]);
+        //     $key = array_search($bid, $ids);
+        //     if ($key !== false)
+        //     array_splice($ids, $key, 1);
+            // Cache::set('check',$ids,7200);
+            // $count=count($ids);
+            // if($count==0){
+            //     Staff::where('id','eq',$id)->update(['check'=>0]);
+            //     Cache::rm('check');
+            // }else{
+            //     $ids=Cache::get('check');
+            // }
            
-            // dump($ids);die();
-        }
+        //     // dump($ids);die();
+        // }
         $ids=Cache::get('check');
         return json(['code'=>200,'ids'=>$ids]);
     }
@@ -115,7 +124,34 @@ class Guide extends Controller
         $pid=Staff::where([['department','eq',$did],['job','eq',28]])->field('id,name')->select();
         return json(['code'=>200,'fu'=>$pid]);
     }
-    
+    // 审核通过
+    public function shent($id){
+        GuideModel::where('id','eq',$id)->update(['status'=>0]);
+        $bid=GuideModel::where('id','eq',$id)->column('bid')[0];
+        Building::where('id','eq',$bid)->update(['status'=>0,'old'=>0]);
+
+        $ids=Cache::get('check');
+        $key = array_search($bid, $ids);
+        if ($key !== false)
+        array_splice($ids, $key, 1);
+        $count=count($ids);
+        if($count==0){
+            Staff::where('id','eq',$id)->update(['check'=>0]);
+            Cache::rm('check');
+            return json(['code'=>220]);
+        }else{
+            $ids=Cache::get('check');
+        }
+        Cache::set('check',$ids,7200);
+        return json(['code'=>200]);
+    }
+    // 审核不通过
+    public function shenb($id){
+        GuideModel::where('id','eq',$id)->update(['status'=>2]);
+        $bid=GuideModel::where('id','eq',$id)->column('bid')[0];
+        Building::where('id','eq',$bid)->update(['status'=>2]);
+        return json(['code'=>200]);
+    }
     /**
      * 显示指定的资源
      *
@@ -151,7 +187,21 @@ class Guide extends Controller
         ];
         return json($res);
     }
-
+    // 审核状态下的修改
+    public function editdong($id){
+        $data=GuideModel::where('id','eq',$id)->find();
+        $l=Staff::where('id','eq',$data['s_id'])->column('name');
+        if($l){
+            $data['name']=$l[0];
+        }else{
+            $data['name']='没有';
+        }
+        $res=[
+            'code'=>200,
+            'data'=>$data
+        ];
+        return json($res);
+    }
     /**
      * 保存更新的资源
      *
@@ -163,7 +213,13 @@ class Guide extends Controller
     {
         //
         $data=$request->param();
-        $data['s_id']=session('user.id');
+        // $data['s_id']=session('user.id');
+        $status=GuideModel::where('id','eq',$id)->column('status')[0];
+        if($status==2){
+            $data['status']=1;
+            $bid=GuideModel::where('id','eq',$id)->column('bid')[0];
+            Building::where('id','eq',$bid)->update(['status'=>1]);
+        }
         GuideModel::update($data,['id'=>$id]);
         $gid=$data['gid'];
 

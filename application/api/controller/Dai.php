@@ -338,6 +338,10 @@ class Dai extends Controller
         $data['s_id']=session('user.id');
         $data['project']=array_filter($data['project']);
         $uid=$request->param()['u_id'];
+        $s_id=User::where('id','eq',$uid)->column('s_id')[0];
+        if($s_id==0){
+            return json(['code'=>300,'msg'=>'请先转到私客中再操作']);
+        }
         $list=DaiModel::where([['s_id','eq',session('user.id')],['u_id','eq',$uid]])->select();
         $ll=[];
         

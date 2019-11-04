@@ -148,7 +148,9 @@ return [
     'Weichat'=>[
         'AppID'=>'wx9cec3d8b5bdc44d9',
         'AppSecret'=>'f16527fd03fbc4f343602928c78af561',
-        'industry_id'=>[29,]
+        'industry_id'=>[29,],
+        'login_appid'=>'wx0fb7649b4c57076a',
+        'login_secret'=>'432722cfbbe53dfe72b1d5fb471390d4'
     ],
     'white_list_ip'=>[
         '127.0.0.1','139.155.128.107','39.98.227.114','47.92.241.83'

@@ -7,7 +7,9 @@
  */
 
 namespace app\api\controller;
-use app\api\model\Area;
+use app\api\model\Staff;
+use app\api\model\Role;
+use Cryption;
 use HttpHelper;
 use think\facade\Cache;
 use think\Request;
@@ -15,6 +17,7 @@ use \Weichat as WeichatModel;
 use think\Controller;
 use app\api\model\User;
 use \FilterWord;
+
 class Weichat extends Controller
 {
 
@@ -46,7 +49,7 @@ class Weichat extends Controller
     protected function validate_logic($scecret,$apikey){
         $encrypted = encrypt_password($apikey);
         if($scecret !== $encrypted){
-           return false;
+            return false;
         }
         return true;
     }
@@ -58,7 +61,7 @@ class Weichat extends Controller
      * @return \think\response\Json
      */
     public function getToken(Request $request){
-        
+
 //        Cache::store('redis')->set('test:name:1','value',3600);
 //        halt( Cache::store('redis')->get('test:name:1'));
 
@@ -90,5 +93,103 @@ class Weichat extends Controller
         }
     }
 
+    /**
+     * 绑定判断
+     */
+    public function bindingjudge(){
+        $code = input('param.code');
+        try{
+            $appId = config('app.Weichat.login_appid');
+            $secret = config('app.Weichat.login_secret');
+            $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={$appId}&secret={$secret}&code=$code&grant_type=authorization_code";
+            $http = HttpHelper::initData($url,'application/json', '', 'UTF-8', []);
+            $res = ($http->doGet());
+            if(empty($res)){
+                throw new \Exception('微信接口调用失败');
+            }
+            $obj = json_decode($res,true);
+            if(!isset($obj['openid'])){
+                throw new \Exception('微信接口调用失败:'.$res);
+            }
+            $staff = Staff::get(['openid'=>$obj['openid']]);
+            if(empty($staff)){
+                //todo 需要换成前端的绑定用户页路由
+                echo "<script>parent.window.location.href='".
+                    "http://ll.edefang.net/#/loginweibang?openid=".$obj['openid']."';</script>";
+                exit();
+            }
+            if($staff->enable == 0){
+              throw new \Exception('该账号已被禁用');
+            }
+            $num = $this->createNoncestr(8);
+            session('user',$staff);
+            cache($staff->name,$num,3600);
 
+            $staff['ids']=Role::where('id',$staff->job)->value('ids');
+            session('user',$staff);
+            //todo 登录成功，需要换成登录成功的路由
+            echo "<script>parent.window.location.href='".
+                "http://ll.edefang.net/#/home?name=".Cryption::Encode($staff->name)."&num=".Cryption::Encode($num)."';</script>";
+            exit();
+
+        }catch (\Exception $e){
+            //todo 需要换成前端的错误页路由
+            echo "<script>parent.window.location.href='".
+                'http://ll.edefang.net/#/loginshua?msg='.$e->getMessage()."';</script>";
+            exit();
+        }
+    }
+
+    /**
+     * 确定登录
+     * @return \think\response\Json
+     */
+    public function sure(){
+        try{
+            $username = input('param.username');
+            $password = input('param.password');
+            $openid = input('param.openid');
+
+            $staff = Staff::get(['name'=>$username,'enable'=>1]);
+            if(empty($staff)){
+                throw new \Exception('员工不存在或被禁用');
+            }
+
+            if($staff->password != encrypt_password($password)){
+                throw new \Exception('您输入的密码错误');
+            }
+            if(!empty($staff->openid)){
+                throw new \Exception('您的微信已经绑定过，请联系管理员！');
+            }
+            $staff->openid = $openid;
+            $staff->update_time = time();
+            if(!$staff->save()){
+                throw new \Exception($staff->getError());
+            }
+
+            $num = $this->createNoncestr(8);
+            session('user',$staff);
+            cache($staff->name,$num,3600);
+            $staff['ids']=Role::where('id',$staff->job)->value('ids');
+            session('user',$staff);
+            return json(['code'=>200,'message'=>'登录成功','name'=>$staff->name,'num'=>$num]);
+        }catch (\Exception $e){
+            return json(['code'=>500,'message'=>$e->getMessage()]);
+        }
+    }
+
+    /**
+     * 产生定长随机串
+     * @param int $length
+     * @return string
+     */
+    function createNoncestr( $length = 32 )
+    {
+        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        $str ="";
+        for ( $i = 0; $i < $length; $i++ )  {
+            $str.= substr($chars, mt_rand(0, strlen($chars)-1), 1);
+        }
+        return $str;
+    }
 }
