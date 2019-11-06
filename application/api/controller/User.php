@@ -71,8 +71,9 @@ class User extends Controller
             }
             //区
             if(isset($arr_param['region'])&&!empty($arr_param['region'])){
-                $distinct = $arr_param['region'];
-                $where = $where." and eu.region = $distinct ";
+                $ss=$arr_param['region'][2];
+                $l=Area::where('area_name','eq',$ss)->column('id')[0];
+                $where = $where." and eu.region = $l ";
             }
             $isDelegatorCondition = $type == '公客'?'sid':'s_id';//公客没有委托人
             //城市
@@ -604,7 +605,7 @@ class User extends Controller
                 if($tiao['region']){
                     $ss=$tiao['region'][2];
                     $l=Area::where('area_name','eq',$ss)->column('id')[0];
-                    $where[]=['region','in',$l];
+                    $where[]=['region','eq',$l];
                 }
             }
             if (array_key_exists('tel',$tiao)) {
@@ -758,7 +759,7 @@ class User extends Controller
             if($tiao['region']){
                 $ss=$tiao['region'][2];
                 $l=Area::where('area_name','eq',$ss)->column('id')[0];
-                $where[]=['region','in',$l];
+                $where[]=['region','eq',$l];
             }
         }
         if (array_key_exists('tel',$tiao)) {
@@ -812,7 +813,6 @@ class User extends Controller
                 $where[]=['name','like','%'.$tiao['name'].'%'];
             }
         }
-
         $pai=request()->param();
         if (array_key_exists('sheng',$pai)) {
             if (array_key_exists('sheng',$pai)) {

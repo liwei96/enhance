@@ -113,7 +113,7 @@ class Guide extends Controller
            
         //     // dump($ids);die();
         // }
-        $ids=Cache::get('check');
+        $ids=Cache::get('check'.session('user')['id']);
         return json(['code'=>200,'ids'=>$ids]);
     }
 
@@ -130,19 +130,19 @@ class Guide extends Controller
         $bid=GuideModel::where('id','eq',$id)->column('bid')[0];
         Building::where('id','eq',$bid)->update(['status'=>0,'old'=>0]);
 
-        $ids=Cache::get('check');
+        $ids=Cache::get('check'.session('user')['id']);
         $key = array_search($bid, $ids);
         if ($key !== false)
         array_splice($ids, $key, 1);
         $count=count($ids);
         if($count==0){
             Staff::where('id','eq',$id)->update(['check'=>0]);
-            Cache::rm('check');
+            Cache::rm('check'.session('user')['id']);
             return json(['code'=>220]);
         }else{
-            $ids=Cache::get('check');
+            $ids=Cache::get('check'.session('user')['id']);
         }
-        Cache::set('check',$ids,7200);
+        Cache::set('check'.session('user')['id'],$ids,7200);
         return json(['code'=>200]);
     }
     // 审核不通过
@@ -190,6 +190,8 @@ class Guide extends Controller
     // 审核状态下的修改
     public function editdong($id){
         $data=GuideModel::where('id','eq',$id)->find();
+        $ll=[];
+        $ll[]=$data;
         $l=Staff::where('id','eq',$data['s_id'])->column('name');
         if($l){
             $data['name']=$l[0];
@@ -198,7 +200,7 @@ class Guide extends Controller
         }
         $res=[
             'code'=>200,
-            'data'=>$data
+            'data'=>$ll
         ];
         return json($res);
     }

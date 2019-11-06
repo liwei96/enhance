@@ -1013,15 +1013,24 @@ class Index
 
     // 判断项目负责人动态跟新情况
     public function checkdong(){        
-        $d=session('user')['id'];
-        if($d!=1){
+        $id=session('user')['id'];
+                
+        $job=Staff::where('id','eq',$id)->column('job')[0];
+        if(!in_array($id,[86,87,84,83])){
             return json(['code'=>200,'msg'=>'正常']);
         }
-        $id=85;
-        $job=Staff::where('id','eq',$id)->column('job')[0];
-        $data=Db::query("select * from (select * from erp_guide where s_id = $id and status = 0 order by id desc) a  GROUP BY a.bid");
-        // dump($data);die();
-        // $data=Guide::where('s_id','eq',$id)->group('bid')->order('update_time','asc')->field('id,update_time,s_id,bid')->select();
+	    // $id=85;
+        
+        $ids=Building::where('charge_id','eq',$id)->column('id');
+        
+        if($ids){
+            $ids=implode(',',$ids);
+            $data=Db::query("select * from (select * from erp_guide where bid in ($ids) and status = 0 order by update_time desc) a  GROUP BY a.bid");
+        }else{
+            $data=[];
+        }
+        
+        
         $time=time();
         $name='';
         $name1='';
@@ -1031,21 +1040,21 @@ class Index
         $ids=[];
         
         foreach($data as $v){
-            if($time-strtotime($v['update_time'])>3600*24*7){
+            if($time-$v['update_time']>3600*24*7){
                 $n=Building::where('id','eq',$v['bid'])->column('building_name')[0];
                 Building::where('id','eq',$v['bid'])->update(['old'=>3]);
                 $name.=$n.'-';
                 $num=1;
                 $l=1;
                 $ids[]=$v['bid'];
-            }else if($time-strtotime($v['update_time'])>3600*24*6){
+            }else if($time-$v['update_time']>3600*24*6){
                 $n1=Building::where('id','eq',$v['bid'])->column('building_name')[0];
                 Building::where('id','eq',$v['bid'])->update(['old'=>2]);
                 $name1.=$n1.'-';
                 $l=2;
                 $ids[]=$v['bid'];
                 $num=1;
-            }else if($time-strtotime($v['update_time'])>3600*24*5){
+            }else if($time-$v['update_time']>3600*24*5){
                 $n2=Building::where('id','eq',$v['bid'])->column('building_name')[0];
                 Building::where('id','eq',$v['bid'])->update(['old'=>1]);
                 $name2.=$n2.'-';
@@ -1081,8 +1090,10 @@ class Index
             $ds=Staff::where('pid','eq',session('user.id'))->select();
             $ds=$this->gets($ds);
             $ds[]=session('user.id');
-            $ds=Guide::where('s_id','in',$ids)->column('bid');
-            $data=Building::where('id','in',$ds)->where('status','eq',1)->column('id');
+            $data=Building::where('charge_id','in',$ds)->where('status','eq',1)->column('id');
+            if($data){
+                $num=1;
+            }
             foreach($data as $v){
                 $ids[]=$v;
             }
@@ -1093,8 +1104,8 @@ class Index
             return json(['code'=>200,'msg'=>'正常']);
         }else{
             // $job=28;
-            $job=Staff::where('id','eq',session('user.id'))->column('job')[0];
-            Cache::set('check',$ids,7200);
+            //$job=Staff::where('id','eq',session('user.id'))->column('job')[0];
+            Cache::set('check'.$id,$ids,7200);
             return json(['code'=>202,'name1'=>$name1,'name2'=>$name2,'name'=>$name,'l'=>$l,'ids'=>$ids,'job'=>$job]);
         }
     }

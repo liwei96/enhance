@@ -10,4 +10,5 @@
 use think\facade\Route;
 //excel导出
 Route::rule('export','export/index');
+Route::rule('sdf','export/create');
 

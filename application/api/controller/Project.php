@@ -109,11 +109,17 @@ class Project extends Controller
         $ids=request()->param('ids');
         $data=Building::where('id','in',$ids)->where('status','eq',1)->field('id,building_name')->select();
         $num=Building::where('id','in',$ids)->where('status','eq',1)->count('*');
+        // dump($data);die();
         foreach($data as $v){
             $gs=Guide::where('bid','eq',$v['id'])->where('status','eq',1)->find();
             $id=$gs['s_id'];
+            $name=Staff::where('id','eq',$id)->column('name');
+            if($name){
+                $v['name']=$name[0];
+            }else{
+                $v['name']='';
+            }
             
-            $v['name']=Staff::where('id','eq',$id)->column('name')[0];
             $v['status']=$gs['status'];
             $v['gid']=$gs['id'];
             $v['time']=$gs['update_time'];
@@ -1292,6 +1298,7 @@ class Project extends Controller
     {
 
         try{
+            $big_small= input('param.big_small',1);
             $data = urldecode(input('param.data'));
             if(empty($data)){
                 throw new \Exception('空文件');
@@ -1315,17 +1322,33 @@ class Project extends Controller
             if($r==false){
                 throw new \Exception('新文件写入失败');
             }
+            if($big_small){
+                $pics_big =  '/uploads/' . date('Ymd') . '/thumb_800_' . $str . '.' . $type;
+                $pics_small = '/uploads/' . date('Ymd') .  '/thumb_400_' . $str . '.' . $type;
+                $image = Image::open('.' . $newFilePath);
+                $image->water('./logo.png',\think\Image::WATER_SOUTHEAST,100)->save('.' . $newFilePath);
+                $image = Image::open('.' . $newFilePath);
+                $image->thumb(1200, 1200)->save('.' . $pics_big);
+                $image->thumb(400, 400)->save('.' . $pics_small);
+            }else{
+                $pics_big = '';
+                $pics_small = '';
+            }
 
             $row = [
                 'code' => 200,
                 'picture' => 'api.jy1980.com'.$newFilePath,
-                'message'=>'操作成功'
+                'message'=>'操作成功',
+                'big'=>$pics_big,
+                'small'=>$pics_small
             ];
         }catch (\Exception $e){
             $row = [
                 'code' => 500,
                 'picture' => null,
-                'message'=>$e->getMessage()
+                'message'=>$e->getMessage(),
+                'big'=>'',
+                'small'=>''
             ];
         }
         return json($row);

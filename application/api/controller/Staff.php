@@ -66,8 +66,12 @@ class Staff extends Controller
         $data=$request->param()['value'];
         $data['password']=encrypt_password($data['password']);
         $data['r_time']=substr($data['r_time'],0,10);
-        $data['birth1']=substr($data['birth1'],0,10);
-        $data['birth2']=substr($data['birth2'],0,10);
+        if(array_key_exists('birth1',$data)){
+            $data['birth1']=substr($data['birth1'],0,10);
+        }
+        if(array_key_exists('birth2',$data)){
+            $data['birth2']=substr($data['birth2'],0,10);
+        }
         StaffModel::create($data);
         $res=['code'=>200];
         return json($res);
@@ -134,7 +138,7 @@ class Staff extends Controller
         $city=Qu::where('name','eq',$data['city'])->column('id');
         $area=Qu::where('name','eq',$data['area'])->column('id');
         $department=Qu::where('name','eq',$data['department'])->column('id');
-        $pid=Staff::where('name','eq',$data['pid'])->column('id');
+        $pid=StaffModel::where('name','eq',$data['pid'])->column('id');
         
         if($job){
             $data['job']=$job[0];
@@ -184,7 +188,7 @@ class Staff extends Controller
     public function sou(){
         $tiao=request()->param()['value'];
         $where=[];
-	$where['enable']=['enable','eq',1];
+	    $where[]=['enable','eq',1];
         if(array_key_exists('name',$tiao)){
             $where[]=['name','like','%'.$tiao['name'].'%'];
         }
