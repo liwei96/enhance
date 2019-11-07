@@ -835,6 +835,11 @@ class User extends Controller
             }else{
                 $v['project']='未定义';
             }
+            if(Building::where('id',$v['project'])->column('charge_id')){
+                $v['charge_id']=Building::where('id',$v['project'])->column('charge_id')[0];
+            }else{
+                $v['charge_id']=0;
+            }
             $tt=Gen::where('u_id',$v['id'])->order('id','desc')->limit(1)->column('t_time');
             if($tt){
                 $v['t_time']=date('Y-m-d H:i',$tt[0]);

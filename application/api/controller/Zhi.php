@@ -9,6 +9,7 @@ use think\Request;
 use app\api\model\Zhi as ZhiModel;
 use app\api\model\Ping;
 use app\api\model\Guide;
+use app\api\model\Staff;
 use think\Db;
 
 class Zhi extends Controller
@@ -245,12 +246,36 @@ order by create_time DESC";
         }
     }
 
+    function gets($data){
+        static $ids=[];
+
+        foreach($data as $v){
+            $dd=Staff::where('pid','eq',$v['id'])->select();
+            if($dd){
+                $this->gets($dd);
+                $ids[]=$v['id'];
+            }else{
+                $ids[]=$v['id'];
+            }
+        }
+        return $ids;
+    }
     // 负责人
     public function fuze(){
-        $bid=request()->param('bid');
+        $uid=session('user')['id'];
+        $data=Staff::where('pid',$uid)->select();
+        $ids=$this->gets($data);
         $id=request()->param('id');
-        Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
-        Building::update(['charge_id'=>$id],['id'=>$bid]);
-        return json(['code'=>200]);
+        if(in_array($id,$ids)){
+            $bid=request()->param('bid');
+            Guide::where('bid','eq',$bid)->update(['s_id'=>$id]);
+            Building::update(['charge_id'=>$id],['id'=>$bid]);
+            return json(['code'=>200]);
+        }else{
+            return json(['code'=>300,'msg'=>'只能选择自己的组员']);
+        }
+        
+        
+        
     }
 }
