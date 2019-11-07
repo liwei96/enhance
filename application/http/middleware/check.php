@@ -76,14 +76,14 @@ class check
             if($data['num']==Cache::get($data['name'])){
                 if(Session::get('user')){
                     cache($data['name'],$data['num'],3600);
-//                    $check=Staff::where('id','eq',Session::get('user')['id'])->column('check')[0];
-//                    $controller=request()->controller();
-//                    $action=request()->action();
-                    // if($controller!='Index' && $action != 'save'){
-                    //     if($check == 2){
-                    //         return json(['code'=>'303','msg'=>'有超过7天未更新的动态，不能访问']);
-                    //     }
-                    // }
+                   $check=Staff::where('id','eq',Session::get('user')['id'])->column('check')[0];
+                   $controller=request()->controller();
+                   $action=request()->action();
+                    if($controller!='Guide' && $action != 'update'){
+                        if($check == 2){
+                            return json(['code'=>'303','msg'=>'有超过7天未更新的动态，不能访问']);
+                        }
+                    }
                     
                     if($this->checkauth()){
                         $param = input('param.');

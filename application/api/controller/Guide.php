@@ -59,23 +59,21 @@ class Guide extends Controller
         $list['gid']=$ma;
         $list['create_time']=time();
         $list['update_time']=time();
-        $l=GuideModel::where('bid','eq',$bid)->limit(1)->column('s_id');
-        Db::connect('db_config1')->table('tpshop.tpshop_text')->insert($list);
-        Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
+        // $data['s_id']=Building::where('id','eq',$bid)->column('charge_id')[0];
+        $data['s_id']=session('user')['id'];
+        //$l=GuideModel::where('bid','eq',$bid)->limit(1)->column('s_id');
+        // Db::connect('db_config1')->table('tpshop.tpshop_text')->insert($list);
+        // Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
         $data['bid']=$bid;
         $data['gid']=$ma;
         
         
-        if($l){
-            $data['s_id']=$l[0];
-            
-        }else{
-            $sid=session('user.id');
-            $data['s_id']=$sid;
-        }
-        if(session('user.id')==150 && session('user.id')==126){
+        
+        if(session('user.id')==150 || session('user.id')==126){
             $data['status']=0;
             Building::where('id','eq',$bid)->update(['status'=>0]);
+            Db::connect('db_config1')->table('tpshop.tpshop_text')->insert($list);
+            Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($list);
         }else{
             $data['status']=1;
             Building::where('id','eq',$bid)->update(['status'=>1]);
@@ -129,6 +127,21 @@ class Guide extends Controller
         GuideModel::where('id','eq',$id)->update(['status'=>0]);
         $bid=GuideModel::where('id','eq',$id)->column('bid')[0];
         Building::where('id','eq',$bid)->update(['status'=>0,'old'=>0]);
+        $list=GuideModel::where('id','eq',$id)->find();
+        
+        $l=Building::where('id',$bid)->column('building_name')[0];
+        $id=Db::connect('db_config1')->table('tpshop.tpshop_goods')->where('building_name','eq',$l)->find();
+        $jk=[];
+        $jk['bid']=$id['id'];
+        $jk['create_time']=time();
+        $jk['update_time']=time();
+        $jk['introduce']=$list['introduce'];
+        $jk['type']=$list['type'];
+        $jk['gid']=$list['gid'];
+        unset($list['id']);
+        Db::connect('db_config1')->table('tpshop.tpshop_text')->insert($jk);
+        Db::connect('db_config2')->table('tpshop.tpshop_text')->insert($jk);
+        
 
         $ids=Cache::get('check'.session('user')['id']);
         $key = array_search($bid, $ids);

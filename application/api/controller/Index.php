@@ -1014,23 +1014,21 @@ class Index
     // 判断项目负责人动态跟新情况
     public function checkdong(){        
         $id=session('user')['id'];
-                
         $job=Staff::where('id','eq',$id)->column('job')[0];
-        if(!in_array($id,[86,87,84,83])){
-            return json(['code'=>200,'msg'=>'正常']);
-        }
-	    // $id=85;
-        
+        // if(!in_array($id,[86,87,84,83])){
+        //     return json(['code'=>200,'msg'=>'正常']);
+        // }
+	if($id==2){
+	    $id=69;
+	    $job=28;
+	}
         $ids=Building::where('charge_id','eq',$id)->column('id');
-        
         if($ids){
             $ids=implode(',',$ids);
             $data=Db::query("select * from (select * from erp_guide where bid in ($ids) and status = 0 order by update_time desc) a  GROUP BY a.bid");
         }else{
             $data=[];
         }
-        
-        
         $time=time();
         $name='';
         $name1='';
@@ -1038,7 +1036,6 @@ class Index
         $num=0;
         $l=0;
         $ids=[];
-        
         foreach($data as $v){
             if($time-$v['update_time']>3600*24*7){
                 $n=Building::where('id','eq',$v['bid'])->column('building_name')[0];
@@ -1099,12 +1096,9 @@ class Index
             }
                         
         }
-
         if($num==0){
             return json(['code'=>200,'msg'=>'正常']);
         }else{
-            // $job=28;
-            //$job=Staff::where('id','eq',session('user.id'))->column('job')[0];
             Cache::set('check'.$id,$ids,7200);
             return json(['code'=>202,'name1'=>$name1,'name2'=>$name2,'name'=>$name,'l'=>$l,'ids'=>$ids,'job'=>$job]);
         }

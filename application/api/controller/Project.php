@@ -88,18 +88,8 @@ class Project extends Controller
             }
             $v['jin']=User::where('project','eq',$v['id'])->count('id');
             $v['dai']=Dai::where('project','eq',$v['id'])->count('id');
-            $l=Guide::where('bid','eq',$v['id'])->limit(0,1)->column('s_id');
-            if($l){
-                $l=$l[0];
-                $k=Staff::where('id','eq',$l)->column('name');
-                if($k){
-                    $v['fu']=$k[0];
-                }else{
-                    $v['fu']='';
-                }
-            }else{
-                $v['fu']='';
-            }
+	    $v['fu']=Staff::where('id','eq',$v['charge_id'])->column('name')[0];
+            
         }
         return json(['code'=>200,'data'=>$data,'num'=>$num,'ids'=>$ids]);
     }
@@ -136,7 +126,12 @@ class Project extends Controller
             $gs=Guide::where('bid','eq',$v['id'])->where('status','eq',2)->find();
             $id=$gs['s_id'];
             
-            $v['name']=Staff::where('id','eq',$id)->column('name')[0];
+            $name=Staff::where('id','eq',$id)->column('name');
+            if($name){
+                $v['name']=$name[0];
+            }else{
+                $v['name']='';
+            }
             $v['status']=$gs['status'];
             $v['gid']=$gs['id'];
             $v['time']=$gs['update_time'];
@@ -379,7 +374,9 @@ class Project extends Controller
         }
         
         $img = $request->param()['img'];
-        
+        if(!$img){
+            return json(['code'=>300,'msg'=>'没有上传图片']);
+        }
         $data = $data['value'];
         $data['hetong'] = $hetong;
         $data['building_img'] = $img;
