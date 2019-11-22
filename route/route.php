@@ -133,7 +133,11 @@ Route::group('zhi',[
     'ping'=>'api/zhi/save_comment',
 	'comments'=>'api/zhi/comments',
     'delete/comment'=>'api/zhi/deletecomment',
-	'fuze'=>'api/zhi/fuze'
+    'fuze'=>'api/zhi/fuze',
+    'wen'=>'api/zhi/wen',
+    'wenlist'=>'api/zhi/wenlist',
+    'wenupdate'=>'api/zhi/wenupdate',
+    'wendelete'=>'api/zhi/wendelete'
 ])->middleware('check');
 Route::group('index',[
     'index'=>'api/index/index',

@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use HttpHelper;
 use think\Controller;
 use think\Request;
 use think\Validate;
@@ -540,6 +541,10 @@ class Project extends Controller
         unset($b['tdeng']);
         $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->insert($b);
         $re = Building::create($data);
+
+        $url = "http://test.edefang.net/index/api/reset_feature?id=".$re->id;
+        $http = HttpHelper::initData($url, 'text/html;charset=UTF-8', '', 'UTF-8', null);
+        $http->doGet();
         if (!$re) {
             $res = ['code' => 301, 'msg' => '新增失败'];
             return json($res);
@@ -911,6 +916,10 @@ class Project extends Controller
         unset($b['tdeng']);
         $ll=Db::connect('mysql://tpshop:zRitAk6cryrkKJCB@39.98.227.114:3306/tpshop#utf8')->table('tpshop_goods')->where('id',$yid)->update($b);
         $re = Building::update($data, ['id' => $id]);
+
+        $url = "http://test.edefang.net/index/api/reset_feature?id=".$id;
+        $http = HttpHelper::initData($url, 'text/html;charset=UTF-8', '', 'UTF-8', null);
+        $http->doGet();
         if (!$re) {
             $res = ['code' => 301, 'msg' => '更新失败'];
             return json($res);

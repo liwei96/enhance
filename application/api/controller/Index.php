@@ -1019,9 +1019,9 @@ class Index
         //     return json(['code'=>200,'msg'=>'正常']);
         // }
 	if($id==2){
-	    $id=68;
+	    $id=69;
 	    $job=28;
-	}
+    }
         $ids=Building::where('charge_id','eq',$id)->column('id');
         if($ids){
             $ids=implode(',',$ids);

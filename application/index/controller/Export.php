@@ -152,11 +152,12 @@ class Export extends Controller
         // }
         // unset($data[0]);
         // unset($data[1]);  project_extend_dengji
-        // $s=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq','中粮大悦城')->find();
+        // $s=Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('id','eq','486')->find();
         // unset($s['id']);
         // unset($s['n_time']);
-        // $l=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_building')->field('building_name,project_extend_dengji')->select();
-        
+        // unset($s['tdeng']);
+        // $l=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_building')->insert($s);
+        // dump($l);die();
         // foreach($l as $v){
         //     Db::connect('mysql://root:BmaGRa6mBNdbKTNw@47.92.241.83:3306/tpshop#utf8')->table('tpshop_goods')->where('building_name','eq',$v['building_name'])->update(['tdeng'=>$v['project_extend_dengji']]);
         // }
@@ -165,10 +166,11 @@ class Export extends Controller
 
         // dump($n);
         // Db::name('staff')->insertAll($data,true);
-        $data=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where('s_id','eq',95)->whereTime('update_time','<','2019-10-1')->update(['s_id'=>0]);
-        dump($data);die();
-        // Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where('sid','eq',131)->update(['sid'=>125,'s_id'=>125]);
-
+        // $data=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where('s_id','eq',95)->whereTime('update_time','<','2019-10-1')->update(['s_id'=>0]);
+        // dump($data);die();
+        // $l=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_building')->alias('b')->join('erp_area a','b.cate_id=a.id')->field("b.branch,a.area_name,count('*')")->group('b.branch')->select();
+        $l=Db::connect('mysql://erp:ZkMFXYZ2H7MBtW4i@127.0.0.1:3306/erp#utf8')->table('erp_user')->where([['s_id','eq','74'],[]])->update(['s_id'=>69]);
+        dump($l);die();
         // foreach($sheetdata as $k=>$v){
         //     if($k!=0 ){
         //         $l=[];

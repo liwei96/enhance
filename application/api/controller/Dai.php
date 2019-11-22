@@ -394,7 +394,7 @@ class Dai extends Controller
         $data['u_id']=$uid;
         $data['type']=$request->param('type');
         $time=User::where('id',$data['u_id'])->column('create_time')[0];
-        if(time()-$time<(3600*24*3)){
+        if(time()-$time<(3600*24*7)){
             $data['label']='新客';
             $ss='新客';
             User::update(['dai'=>$ss,'id'=>$uid]);
@@ -405,7 +405,7 @@ class Dai extends Controller
             // $a['action']='新客带看';
             // $a['bid']=$ids[0];
             // Integral::create($a);
-        }else if(time()-$time>(3600*24*3)){
+        }else if(time()-$time>(3600*24*7)){
             $data['label']='老客';
             $ss='老客';
             User::update(['dai'=>$ss,'id'=>$uid]);

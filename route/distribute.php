@@ -24,5 +24,8 @@ Route::rule('/distribute/cities','api/distribute/cities');
 
 Route::rule('/distribute/index','api/distribute/index');
 Route::rule('/distribute/sure','api/distribute/sure');
+Route::rule('/distribute/interval','api/distribute/interval');
+
+
 
 

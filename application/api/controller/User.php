@@ -396,6 +396,13 @@ class User extends Controller
     {
         //
         $data=$request->param()['value'];
+        $pro=$data['project'];
+        $tel=$data['tel'];
+        $time=$data['time'];
+        $l=UserModel::where([['tel','eq',$tel],['project','eq',$pro],['time','eq',$time]])->find();
+        if($l){
+            return json(['code'=>300,'msg'=>'已经存在不能重复录入']);
+        }
         $data['leixing']=implode(',',$data['leixing']);
         $data['ceng']=implode(',',$data['ceng']);
         $dd=[];

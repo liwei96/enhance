@@ -19,8 +19,13 @@ class Option extends Controller
      * 获取进客来源
      * @return \think\response\Json
      */
-    public function sources(){
-        $lst = Db::query("SELECT `key`,`value` from erp.erp_options WHERE type=1");
+    public function sources($enable = 0){
+        if(empty($enable)){
+            $where = '';
+        }else{
+            $where = " and enable=1 ";
+        }
+        $lst = Db::query("SELECT `key`,`value` from erp.erp_options WHERE type=1 $where ");
         return json($lst);
     }
 }

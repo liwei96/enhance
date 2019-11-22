@@ -10,6 +10,7 @@ use app\api\model\Zhi as ZhiModel;
 use app\api\model\Ping;
 use app\api\model\Guide;
 use app\api\model\Staff;
+use app\api\model\Wen;
 use think\Db;
 
 class Zhi extends Controller
@@ -80,6 +81,7 @@ class Zhi extends Controller
         //
         $data=$request->param()['value'];
         $data['type']=$request->param()['type'];
+        $data['s_id']=session('user')['id'];
         ZhiModel::create($data);
         return json(['code'=>200]);
     }
@@ -274,8 +276,37 @@ order by create_time DESC";
         }else{
             return json(['code'=>300,'msg'=>'只能选择自己的组员']);
         }
-        
-        
+    }
+
+    // 项目页的问答
+    public function wen(){
+        $data=request()->param();
+        try{
+            Db::connect(config('database.db_config1'))->table('tpshop_anser')->insert($data);
+            $data['s_id']=session('user')['id'];
+            Wen::create($data);
+            return json(['code'=>200,'msg'=>'添加成功']);
+        }catch(\Exception $e){
+            return json(['code'=>300,'msg'=>$e->getMessage()]);
+        }
         
     }
+    // 历史问答
+    public function wenlist(){
+        $data=Wen::select();
+        return json(['code'=>200,'data'=>$data]);
+    }
+    // 问答删除
+    public function wendelete($id){
+        Wen::destroy($id);
+        return json(['code'=>200,'msg'=>'删除成功']);
+    }
+    // 问答更新
+    public function wenupdate(){
+        $id=request()->param('id');
+        $data=request()->param()['value'];
+        Wen::where('id','eq',$id)->update($data);
+        return json(['code'=>200,'msg'=>'更新成功']);
+    }
+    
 }
